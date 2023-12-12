@@ -11,7 +11,7 @@ export SYSTEMD_PAGER=''
 # ==========================================================================
 # Usage:
 # Master: ./setup_redis.sh master [master_ip] [master_port] [config_file_path] [master_password]
-# Slave: ./setup_redis.sh slave [master_ip] [master_port] [config_file_path] [master_password]
+# Slave: ./setup_redis.sh slave [master_ip] [master_port] [slave_port] [config_file_path] [master_password]
 # Sentinel: ./setup_redis.sh sentinel [master_ip] [master_port] [master_password] [sentinel_config_file_path]
 # ==========================================================================
 # USAGE EXAMPLES FOR setup_redis.sh SCRIPT
@@ -31,11 +31,11 @@ export SYSTEMD_PAGER=''
 
 # For Setting Up a Slave Redis Server:
 # ------------------------------------
-# ./setup_redis.sh slave [master_ip] [master_port] [config_file_path] [master_password]
+# ./setup_redis.sh slave [master_ip] [master_port] [slave_port] [config_file_path] [master_password]
 #
 # Example:
 #
-# ./setup_redis.sh slave 192.168.1.101 6379 /etc/redis/redis.conf myRedisPass123
+# ./setup_redis.sh slave 192.168.1.101 6379 6380 /etc/redis/redis.conf myRedisPass123
 #
 # Here, '192.168.1.101' is the IP address of the slave server (where the slave Redis server will bind),
 # '6379' is the port number for the Redis slave (can be different from the master's port if on the same machine),
@@ -65,7 +65,7 @@ export SYSTEMD_PAGER=''
 ROLE=$1
 
 # Configure Redis based on the role
-configure_redis() {
+configure_redis_master() {
   local ip=$1
   local port=$2
   local config_file=$3
@@ -96,6 +96,39 @@ configure_redis() {
   echo "Redis $ROLE $ip $port $config_file setup complete."
 }
 
+# Configure Redis based on the role
+configure_redis_slave() {
+  local ip=$1
+  local port=$2
+  local port_slave=$3
+  local config_file=$4
+  local password=$5
+
+  sed -i "s/^bind 127.0.0.1/bind $ip/" $config_file
+  sed -i "s/^port 6379/port $port_slave/" $config_file
+  echo "requirepass $password" >> $config_file
+
+  if [ "$ROLE" == "slave" ]; then
+    echo "slaveof $ip $port" >> $config_file
+    echo "masterauth $password" >> $config_file
+  fi
+
+  if [ "$port_slave" -ne '6379' ]; then
+    echo "systemctl start redis${port_slave}"
+    systemctl start redis${port_slave}
+    echo
+    echo "systemctl status redis${port_slave}"
+    systemctl status redis${port_slave}
+  else
+    echo "systemctl start redis"
+    systemctl start redis
+    echo
+    echo "systemctl status redis"
+    systemctl status redis
+  fi
+  echo "Redis $ROLE $ip $port_slave $config_file with master $port setup complete."
+}
+
 # Setup Sentinel
 setup_sentinel() {
   local master_ip=$1
@@ -117,6 +150,18 @@ setup_sentinel() {
     \cp -af /usr/lib/systemd/system/redis-sentinel.service "$custom_service_file"
     sed -i "s|/etc/redis/sentinel.conf|$sentinel_config_file|" "$custom_service_file"
 
+    # Modify original or custom sentinel config file
+    sed -i "s/^sentinel monitor mymaster 127.0.0.1 6379 2/sentinel monitor mymaster $master_ip $master_port 2/" "$sentinel_config_file"
+    sed -i "s/^# sentinel auth-pass <master-name> <password>/sentinel auth-pass mymaster $master_password/" "$sentinel_config_file"
+
+    # fix noexec /tmp
+    mkdir -p /home/redistmp
+    chown redis:redis /home/redistmp
+    chmod 1777 /home/redistmp
+    sed -i 's|dir /tmp|dir /home/redistmp|' "$sentinel_config_file"
+    # fix PID path
+    sed -i 's|pidfile /var/run/redis-|pidfile /var/run/redis/redis-|' "$sentinel_config_file"
+
     # setup limit.conf
     mkdir -p "/etc/systemd/system/redis-sentinel-${master_port}.service.d"
     if [ -f /etc/systemd/system/redis-sentinel.service.d/limit.conf ]; then
@@ -130,6 +175,13 @@ setup_sentinel() {
     if [ -f /etc/systemd/system/redis-sentinel.service.d/limit.conf ]; then
       sed -i "s|LimitNOFILE=.*|LimitNOFILE=524288|" /etc/systemd/system/redis-sentinel.service.d/limit.conf
     fi
+    # fix noexec /tmp
+    mkdir -p /home/redistmp
+    chown redis:redis /home/redistmp
+    chmod 1777 /home/redistmp
+    sed -i 's|dir /tmp|dir /home/redistmp|' "$sentinel_config_file"
+    # fix PID path
+    sed -i 's|pidfile /var/run/redis-|pidfile /var/run/redis/redis-|' "$sentinel_config_file"
   fi
 
   # Reload systemd to recognize new service
@@ -162,9 +214,9 @@ help() {
   echo "       $0 master 192.168.1.100 6479 /etc/redis6479/redis6479.conf myRedisPass123"
   echo
   echo "     On Slave:"
-  echo "       $0 slave [master_ip] [master_port] [config_file_path] [master_password]"
+  echo "       $0 slave [master_ip] [master_port] [slave_port] [config_file_path] [master_password]"
   echo "       $0 slave 192.168.1.101 6379 /etc/redis/redis.conf myRedisPass123"
-  echo "       $0 slave 192.168.1.101 6480 /etc/redis6479/redis6480.conf myRedisPass123"
+  echo "       $0 slave 192.168.1.101 6379 6480 /etc/redis6480/redis6480.conf myRedisPass123"
   echo
   echo "     For Sentinel:"
   echo "       $0 sentinel [master_ip] [master_port] [master_password] [sentinel_config_file_path]"
@@ -173,12 +225,20 @@ help() {
 }
 
 case $ROLE in
-  master|slave)
+  master)
     IP=$2
     PORT=$3
     CONFIG_FILE=$4
     MASTER_PASSWORD=$5
-    configure_redis $IP $PORT $CONFIG_FILE $MASTER_PASSWORD
+    configure_redis_master $IP $PORT $CONFIG_FILE $MASTER_PASSWORD
+    ;;
+  slave)
+    IP=$2
+    PORT=$3
+    SLAVE_PORT=$4
+    CONFIG_FILE=$5
+    MASTER_PASSWORD=$6
+    configure_redis_slave $IP $PORT $SLAVE_PORT $CONFIG_FILE $MASTER_PASSWORD
     ;;
   sentinel)
     MASTER_IP=$2
