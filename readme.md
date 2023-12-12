@@ -19,7 +19,7 @@ Usage:
        ./redis-ha.sh sentinel 192.168.1.100 6479 myRedisPass123 /etc/redis6479/sentinel-redis6479.conf
 ```
 
-Example same server Redis master/slave replication with single Redis Sentinel setup
+Example same server Redis master/slave replication with single Redis Sentinel setup for 2x Redis server instances on port `6479` and `6480` created via https://github.com/centminmod/centminmod-redis
 
 ```
 ./redis-ha.sh master 127.0.0.1 6479 /etc/redis6479/redis6479.conf myRedisPass123
