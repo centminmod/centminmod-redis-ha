@@ -118,6 +118,26 @@ setup_sentinel() {
   echo "Redis Sentinel service setup complete."
 }
 
+help() {
+  echo
+  echo "Usage:"
+  echo
+  echo "     On Master:"
+  echo "       $0 master [master_ip] [master_port] [config_file_path] [master_password]"
+  echo "       $0 master 192.168.1.100 6379 /etc/redis/redis.conf myRedisPass123"
+  echo "       $0 master 192.168.1.100 6479 /etc/redis6479/redis6479.conf myRedisPass123"
+  echo
+  echo "     On Slave:"
+  echo "       $0 slave [master_ip] [master_port] [config_file_path] [master_password]"
+  echo "       $0 slave 192.168.1.101 6379 /etc/redis/redis.conf myRedisPass123"
+  echo "       $0 slave 192.168.1.101 6480 /etc/redis6479/redis6480.conf myRedisPass123"
+  echo
+  echo "     For Sentinel:"
+  echo "       $0 sentinel [master_ip] [master_port] [master_password] [sentinel_config_file_path]"
+  echo "       $0 sentinel 192.168.1.100 6379 myRedisPass123 /etc/redis/sentinel.conf"
+  echo "       $0 sentinel 192.168.1.100 6479 myRedisPass123 /etc/redis6479/sentinel-redis6479.conf"
+}
+
 case $ROLE in
   master|slave)
     IP=$2
@@ -134,7 +154,7 @@ case $ROLE in
     setup_sentinel $MASTER_IP $MASTER_PORT $MASTER_PASSWORD $CONFIG_FILE
     ;;
   *)
-    echo "Invalid role specified. Use 'master', 'slave', or 'sentinel'."
+    help
     exit 1
     ;;
 esac
