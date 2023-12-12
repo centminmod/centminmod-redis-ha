@@ -1,4 +1,13 @@
 #!/bin/bash
+export PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin"
+# set locale temporarily to english
+# due to some non-english locale issues
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
+# disable systemd pager so it doesn't pipe systemctl output to less
+export SYSTEMD_PAGER=''
 # ==========================================================================
 # Usage:
 # Master: ./setup_redis.sh master [master_ip] [master_port] [config_file_path] [master_password]
@@ -71,8 +80,20 @@ configure_redis() {
     echo "masterauth $password" >> $config_file
   fi
 
-  systemctl start redis
-  echo "Redis $ROLE setup complete."
+  if [ "$port" -ne '6379' ]; then
+    echo "systemctl start redis${port}"
+    systemctl start redis${port}
+    echo
+    echo "systemctl status redis${port}"
+    systemctl status redis${port}
+  else
+    echo "systemctl start redis"
+    systemctl start redis
+    echo
+    echo "systemctl status redis"
+    systemctl status redis
+  fi
+  echo "Redis $ROLE $ip $port $config_file setup complete."
 }
 
 # Setup Sentinel
@@ -93,13 +114,22 @@ setup_sentinel() {
 
     # Copy and modify systemd service file
     local custom_service_file="/usr/lib/systemd/system/redis-sentinel-${master_port}.service"
-    cp -a /usr/lib/systemd/system/redis-sentinel.service "$custom_service_file"
+    \cp -af /usr/lib/systemd/system/redis-sentinel.service "$custom_service_file"
     sed -i "s|/etc/redis/sentinel.conf|$sentinel_config_file|" "$custom_service_file"
 
+    # setup limit.conf
+    mkdir -p "/etc/systemd/system/redis-sentinel-${master_port}.service.d"
+    if [ -f /etc/systemd/system/redis-sentinel.service.d/limit.conf ]; then
+      \cp -af /etc/systemd/system/redis-sentinel.service.d/limit.conf "/etc/systemd/system/redis-sentinel-${master_port}.service.d/limit.conf"
+      sed -i "s|LimitNOFILE=.*|LimitNOFILE=524288|" "/etc/systemd/system/redis-sentinel-${master_port}.service.d/limit.conf"
+    fi
   else
     # Modify original or custom sentinel config file
     sed -i "s/^sentinel monitor mymaster 127.0.0.1 6379 2/sentinel monitor mymaster $master_ip $master_port 2/" "$sentinel_config_file"
     sed -i "s/^# sentinel auth-pass mymaster <password>/sentinel auth-pass mymaster $master_password/" "$sentinel_config_file"
+    if [ -f /etc/systemd/system/redis-sentinel.service.d/limit.conf ]; then
+      sed -i "s|LimitNOFILE=.*|LimitNOFILE=524288|" /etc/systemd/system/redis-sentinel.service.d/limit.conf
+    fi
   fi
 
   # Reload systemd to recognize new service
@@ -112,10 +142,14 @@ setup_sentinel() {
   fi
   echo "systemctl enable $service_name"
   systemctl enable "$service_name"
+  echo
   echo "systemctl start $service_name"
   systemctl start "$service_name"
+  echo
+  echo "systemctl status $service_name"
+  systemctl status "$service_name"
 
-  echo "Redis Sentinel service setup complete."
+  echo "Redis Sentinel $master_ip $master_port $sentinel_config_file service setup complete."
 }
 
 help() {
