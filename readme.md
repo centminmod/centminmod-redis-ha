@@ -691,6 +691,50 @@ master0:name=mymaster,status=ok,address=127.0.0.1:6479,slaves=1,sentinels=1
 tail -100 /var/log/redis/sentinel-6479.log 
 ```
 
+```
+redis-cli -h 127.0.0.1 -p 26379 sentinel master mymaster
+ 1) "name"
+ 2) "mymaster"
+ 3) "ip"
+ 4) "127.0.0.1"
+ 5) "port"
+ 6) "6479"
+ 7) "runid"
+ 8) "f9f0b03e00451f392f303ec7f3eb23f7f50ef6b8"
+ 9) "flags"
+10) "master"
+11) "link-pending-commands"
+12) "0"
+13) "link-refcount"
+14) "1"
+15) "last-ping-sent"
+16) "0"
+17) "last-ok-ping-reply"
+18) "108"
+19) "last-ping-reply"
+20) "108"
+21) "down-after-milliseconds"
+22) "5000"
+23) "info-refresh"
+24) "6611"
+25) "role-reported"
+26) "master"
+27) "role-reported-time"
+28) "15356775"
+29) "config-epoch"
+30) "0"
+31) "num-slaves"
+32) "1"
+33) "num-other-sentinels"
+34) "0"
+35) "quorum"
+36) "2"
+37) "failover-timeout"
+38) "180000"
+39) "parallel-syncs"
+40) "1"
+```
+
 # Test Redis master/slave replication
 
 Write to Redis master
