@@ -541,6 +541,8 @@ tail -100 /var/log/redis/redis6480.log
 
 # Redis Sentinel
 
+* https://redis.io/docs/management/sentinel/
+
 ```
 ./redis-ha.sh sentinel 127.0.0.1 6479 myRedisPass123 /etc/redis6479/sentinel-redis6479.conf
 systemctl enable redis-sentinel-6479
@@ -733,6 +735,52 @@ redis-cli -h 127.0.0.1 -p 26379 sentinel master mymaster
 38) "180000"
 39) "parallel-syncs"
 40) "1"
+```
+
+```
+redis-cli -h 127.0.0.1 -p 26379 sentinel replicas mymaster
+1)  1) "name"
+    2) "127.0.0.1:6480"
+    3) "ip"
+    4) "127.0.0.1"
+    5) "port"
+    6) "6480"
+    7) "runid"
+    8) "adfab9c956b1ea421154344b5a423637d0b4f5fd"
+    9) "flags"
+   10) "slave"
+   11) "link-pending-commands"
+   12) "0"
+   13) "link-refcount"
+   14) "1"
+   15) "last-ping-sent"
+   16) "0"
+   17) "last-ok-ping-reply"
+   18) "725"
+   19) "last-ping-reply"
+   20) "725"
+   21) "down-after-milliseconds"
+   22) "5000"
+   23) "info-refresh"
+   24) "4440"
+   25) "role-reported"
+   26) "slave"
+   27) "role-reported-time"
+   28) "707610"
+   29) "master-link-down-time"
+   30) "0"
+   31) "master-link-status"
+   32) "ok"
+   33) "master-host"
+   34) "127.0.0.1"
+   35) "master-port"
+   36) "6479"
+   37) "slave-priority"
+   38) "100"
+   39) "slave-repl-offset"
+   40) "97211077"
+   41) "replica-announced"
+   42) "1"
 ```
 
 # Test Redis master/slave replication
