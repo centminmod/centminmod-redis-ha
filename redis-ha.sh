@@ -174,7 +174,7 @@ setup_sentinel() {
   else
     # Modify original or custom sentinel config file
     sed -i "s/^sentinel monitor mymaster 127.0.0.1 6379 2/sentinel monitor mymaster $master_ip $master_port 2/" "$sentinel_config_file"
-    sed -i "s/^# sentinel auth-pass mymaster <password>/sentinel auth-pass mymaster $master_password/" "$sentinel_config_file"
+    sed -i "s/^# sentinel auth-pass <master-name> <password>/sentinel auth-pass mymaster $master_password/" "$sentinel_config_file"
     if [ -f /etc/systemd/system/redis-sentinel.service.d/limit.conf ]; then
       sed -i "s|LimitNOFILE=.*|LimitNOFILE=524288|" /etc/systemd/system/redis-sentinel.service.d/limit.conf
     fi
