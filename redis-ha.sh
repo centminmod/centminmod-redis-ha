@@ -163,6 +163,7 @@ setup_sentinel() {
     sed -i 's|pidfile /var/run/redis-|pidfile /var/run/redis/redis-|' "$sentinel_config_file"
     # reduce failover time
     sed -i 's|sentinel down-after-milliseconds mymaster 30000|sentinel down-after-milliseconds mymaster 5000|' "$sentinel_config_file"
+    sed -i 's|sentinel failover-timeout mymaster 180000|sentinel failover-timeout mymaster 60000|' "$sentinel_config_file"
 
     # setup limit.conf
     mkdir -p "/etc/systemd/system/redis-sentinel-${master_port}.service.d"
@@ -186,6 +187,7 @@ setup_sentinel() {
     sed -i 's|pidfile /var/run/redis-|pidfile /var/run/redis/redis-|' "$sentinel_config_file"
     # reduce failover time
     sed -i 's|sentinel down-after-milliseconds mymaster 30000|sentinel down-after-milliseconds mymaster 5000|' "$sentinel_config_file"
+    sed -i 's|sentinel failover-timeout mymaster 180000|sentinel failover-timeout mymaster 60000|' "$sentinel_config_file"
   fi
 
   # Reload systemd to recognize new service

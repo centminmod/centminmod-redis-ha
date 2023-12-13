@@ -732,7 +732,7 @@ redis-cli -h 127.0.0.1 -p 26379 sentinel master mymaster
 35) "quorum"
 36) "2"
 37) "failover-timeout"
-38) "180000"
+38) "60000"
 39) "parallel-syncs"
 40) "1"
 ```
