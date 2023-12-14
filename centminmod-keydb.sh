@@ -53,7 +53,7 @@ keydb_install() {
   # if [ "$(nproc)" -ge '4' ]; then
   #   sed -i 's|^# server-thread-affinity|server-thread-affinity|' ${KEYDB_DIR}/keydb.conf
   # fi
-  cat ${KEYDB_DIR}/keydb.conf | egrep '^pid|^port|^log|^dir|^tcp-backlog|^server-threads|server-thread'
+  cat ${KEYDB_DIR}/keydb.conf | egrep '^pid|^port|^log|^dir|^tcp-backlog|^server-threads|server-thread|replica-ignore-maxmemory'
   
   # setup logrotate and systemd service files and dependencies
   \cp -af ./pkg/rpm/keydb_build/keydb_rpm/etc/logrotate.d/keydb /etc/logrotate.d/keydb

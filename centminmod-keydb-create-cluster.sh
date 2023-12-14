@@ -16,6 +16,7 @@ ADDITIONAL_OPTIONS=""
 # default keydb server settings
 SERVER_THREADS=2
 APPEND_ONLY='yes'
+REPLICA_IGNORE_MAXMEMORY='no'
 ######################################################################
 CLUSTER_DIR='/etc/keydb/cluster'
 CLUSTER_DATADIR='/var/lib/keydb-cluster'
@@ -54,7 +55,7 @@ then
         then
             ADDITIONAL_OPTIONS="--save \"\" \"\" \"\" --semi-ordered-set-bucket-size 8 --client-output-buffer-limit replica 1 1 0 --maxmemory 100000000 --storage-provider flash ./$PORT.flash"
         fi
-        $BIN_PATH/keydb-server --dir ${CLUSTER_DATADIR} --server-threads $SERVER_THREADS --port $PORT  --protected-mode $PROTECTED_MODE --cluster-enabled yes --cluster-config-file "${CLUSTER_DIR}/nodes-${PORT}.conf" --cluster-node-timeout $TIMEOUT --appendonly $APPEND_ONLY --appendfilename appendonly-${PORT}.aof --dbfilename dump-${PORT}.rdb --logfile "${CLUSTER_LOGDIR}/${PORT}.log" --daemonize yes ${ADDITIONAL_OPTIONS}
+        $BIN_PATH/keydb-server --dir ${CLUSTER_DATADIR} --server-threads $SERVER_THREADS --port $PORT  --protected-mode $PROTECTED_MODE --cluster-enabled yes --cluster-config-file "${CLUSTER_DIR}/nodes-${PORT}.conf" --cluster-node-timeout $TIMEOUT --appendonly $APPEND_ONLY --appendfilename appendonly-${PORT}.aof --dbfilename dump-${PORT}.rdb --replica-ignore-maxmemory $REPLICA_IGNORE_MAXMEMORY --logfile "${CLUSTER_LOGDIR}/${PORT}.log" --daemonize yes ${ADDITIONAL_OPTIONS}
     done
     exit 0
 fi
