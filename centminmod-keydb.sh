@@ -26,6 +26,7 @@ keydb_install() {
   time make -j$(nproc) BUILD_TLS=yes USE_SYSTEMD=yes MALLOC=jemalloc
   #time make test
   time make install
+  \cp -af ./src/keydb-diagnostic-tool /usr/local/bin/keydb-diagnostic-tool
  
   # add keydb linux user
   getent group keydb &> /dev/null || groupadd -r keydb &> /dev/null

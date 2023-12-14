@@ -62,6 +62,22 @@ Sentinel mode:
        ./keydb-server /etc/sentinel.conf --sentinel
 ```
 
+## KeyDB Diagnostic Tool
+
+* https://docs.keydb.dev/docs/keydbdiagnostictool
+
+```
+keydb-diagnostic-tool -h 127.0.0.1 -p 7379 2>&1 | tee keydb-dignostic1.log
+
+Server has 2 threads.
+Starting...
+1 threads, 50 total clients. CPU Usage Self: 98.9% (98.9% per thread), Serve2 threads, 100 total clients. CPU Usage Self: 197.4% (98.7% per thread), Ser3 threads, 150 total clients. CPU Usage Self: 279.3% (93.1% per thread), Ser4 threads, 200 total clients. CPU Usage Self: 269.9% (67.5% per thread), Ser5 threads, 250 total clients. CPU Usage Self: 374.1% (74.8% per thread), SerError: ��������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
+
+Server CPU load appears to have stagnated with increasing clients.
+Server does not appear to be at full load. Check network for throughput.
+Done.
+```
+
 # Benchmarks
 
 `memtier_benchmark` comparing Redis 7.2.3 vs KeyDB 6.3.4 for 1, 2, 3 threads on 4 CPU core KVM VPS running AlmaLinux 8 with Centmin Mod 130.00beta01 LEMP stack.
