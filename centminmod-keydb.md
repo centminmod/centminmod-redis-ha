@@ -285,3 +285,635 @@ Gets        99902.42       363.91     99538.51         2.44201         2.44700  
 Waits           0.00          ---          ---             ---             ---             ---             ---          --- 
 Totals     106562.59       363.91     99538.51         2.44675         2.44700         4.47900        10.43100      6838.19 
 ```
+
+# KeyDB Cluster Setup
+
+* [Create KeyDB Servers](#create-keydb-servers)
+* [Create KeyDB Cluster](#create-keydb-cluster)
+
+Based on modifed version of the [official script](https://docs.keydb.dev/docs/cluster-tutorial/#creating-a-keydb-cluster-using-the-create-cluster-script).
+
+```
+./centminmod-keydb-create-cluster.sh
+
+Usage: ./centminmod-keydb-create-cluster.sh [start|create|stop|watch|tail|clean|call]
+
+start       -- Launch Redis Cluster instances.
+create [-f] -- Create a cluster using keydb-cli --cluster create.
+stop        -- Stop Redis Cluster instances.
+watch       -- Show CLUSTER NODES output (first 30 lines) of first node.
+tail <id>   -- Run tail -f of instance at base port + ID.
+tailall     -- Run tail -f for all the log files at once.
+clean       -- Remove all instances data, logs, configs.
+clean-logs  -- Remove just instances logs.
+call <cmd>  -- Call a command (up to 7 arguments) on all nodes.
+```
+
+## Create KeyDB Servers
+
+```
+./centminmod-keydb-create-cluster.sh start
+
+Starting 30001
+Starting 30002
+Starting 30003
+Starting 30004
+Starting 30005
+Starting 30006
+```
+
+```
+ls -lAh /etc/keydb/cluster
+total 24K
+-rw-r--r-- 1 root root 114 Dec 14 08:15 nodes-30001.conf
+-rw-r--r-- 1 root root 114 Dec 14 08:15 nodes-30002.conf
+-rw-r--r-- 1 root root 114 Dec 14 08:15 nodes-30003.conf
+-rw-r--r-- 1 root root 114 Dec 14 08:15 nodes-30004.conf
+-rw-r--r-- 1 root root 114 Dec 14 08:15 nodes-30005.conf
+-rw-r--r-- 1 root root 114 Dec 14 08:15 nodes-30006.conf
+```
+
+```
+ls -lAh /var/lib/keydb-cluster
+total 0
+-rw-r--r-- 1 root root 0 Dec 14 08:15 appendonly-30001.aof
+-rw-r--r-- 1 root root 0 Dec 14 08:15 appendonly-30002.aof
+-rw-r--r-- 1 root root 0 Dec 14 08:15 appendonly-30003.aof
+-rw-r--r-- 1 root root 0 Dec 14 08:15 appendonly-30004.aof
+-rw-r--r-- 1 root root 0 Dec 14 08:15 appendonly-30005.aof
+-rw-r--r-- 1 root root 0 Dec 14 08:15 appendonly-30006.aof
+```
+
+```
+ls -laH /var/log/keydb-cluster
+total 28
+drwxr-xr-x   2 keydb keydb  108 Dec 14 08:15 .
+drwxr-xr-x. 16 root  root  4096 Dec 14 08:10 ..
+-rw-r--r--   1 root  root   718 Dec 14 08:15 30001.log
+-rw-r--r--   1 root  root   718 Dec 14 08:15 30002.log
+-rw-r--r--   1 root  root   718 Dec 14 08:15 30003.log
+-rw-r--r--   1 root  root   718 Dec 14 08:15 30004.log
+-rw-r--r--   1 root  root   718 Dec 14 08:15 30005.log
+-rw-r--r--   1 root  root   718 Dec 14 08:15 30006.log
+```
+
+```
+./centminmod-keydb-create-cluster.sh tailall
+
+==> /var/log/keydb-cluster/30001.log <==
+81185:81184:C 14 Dec 2023 08:15:48.143 # oO0OoO0OoO0Oo KeyDB is starting oO0OoO0OoO0Oo
+81185:81184:C 14 Dec 2023 08:15:48.143 # KeyDB version=6.3.4, bits=64, commit=7e7e5e57, modified=0, pid=81185, just started
+81185:81184:C 14 Dec 2023 08:15:48.143 # Configuration loaded
+81185:81184:M 14 Dec 2023 08:15:48.144 * monotonic clock: POSIX clock_gettime
+81185:81184:M 14 Dec 2023 08:15:48.145 * No cluster configuration found, I'm 2c411c29b604c34a7e65f928adb2677cf5aa7ad8
+81185:81184:M 14 Dec 2023 08:15:48.146 * Running mode=cluster, port=30001.
+81185:81184:M 14 Dec 2023 08:15:48.146 # Server initialized
+81185:81195:M 14 Dec 2023 08:15:48.147 * Thread 0 alive.
+81185:81196:M 14 Dec 2023 08:15:48.147 * Thread 1 alive.
+
+==> /var/log/keydb-cluster/30002.log <==
+81199:81186:C 14 Dec 2023 08:15:48.151 # oO0OoO0OoO0Oo KeyDB is starting oO0OoO0OoO0Oo
+81199:81186:C 14 Dec 2023 08:15:48.151 # KeyDB version=6.3.4, bits=64, commit=7e7e5e57, modified=0, pid=81199, just started
+81199:81186:C 14 Dec 2023 08:15:48.151 # Configuration loaded
+81199:81186:M 14 Dec 2023 08:15:48.153 * monotonic clock: POSIX clock_gettime
+81199:81186:M 14 Dec 2023 08:15:48.153 * No cluster configuration found, I'm a9f6c77f2b51b7926bf180a29dbb45bc54426a95
+81199:81186:M 14 Dec 2023 08:15:48.154 * Running mode=cluster, port=30002.
+81199:81186:M 14 Dec 2023 08:15:48.154 # Server initialized
+81199:81209:M 14 Dec 2023 08:15:48.155 * Thread 0 alive.
+81199:81210:M 14 Dec 2023 08:15:48.155 * Thread 1 alive.
+
+==> /var/log/keydb-cluster/30003.log <==
+81213:81200:C 14 Dec 2023 08:15:48.158 # oO0OoO0OoO0Oo KeyDB is starting oO0OoO0OoO0Oo
+81213:81200:C 14 Dec 2023 08:15:48.158 # KeyDB version=6.3.4, bits=64, commit=7e7e5e57, modified=0, pid=81213, just started
+81213:81200:C 14 Dec 2023 08:15:48.158 # Configuration loaded
+81213:81200:M 14 Dec 2023 08:15:48.159 * monotonic clock: POSIX clock_gettime
+81213:81200:M 14 Dec 2023 08:15:48.160 * No cluster configuration found, I'm a834ef1507c8ae55c97d1528612de2ec313c5c3f
+81213:81200:M 14 Dec 2023 08:15:48.161 * Running mode=cluster, port=30003.
+81213:81200:M 14 Dec 2023 08:15:48.161 # Server initialized
+81213:81222:M 14 Dec 2023 08:15:48.161 * Thread 0 alive.
+81213:81223:M 14 Dec 2023 08:15:48.162 * Thread 1 alive.
+
+==> /var/log/keydb-cluster/30004.log <==
+81227:81214:C 14 Dec 2023 08:15:48.166 # oO0OoO0OoO0Oo KeyDB is starting oO0OoO0OoO0Oo
+81227:81214:C 14 Dec 2023 08:15:48.166 # KeyDB version=6.3.4, bits=64, commit=7e7e5e57, modified=0, pid=81227, just started
+81227:81214:C 14 Dec 2023 08:15:48.166 # Configuration loaded
+81227:81214:M 14 Dec 2023 08:15:48.167 * monotonic clock: POSIX clock_gettime
+81227:81214:M 14 Dec 2023 08:15:48.168 * No cluster configuration found, I'm 7be028710efd8db002543fb62c38ef681c736342
+81227:81214:M 14 Dec 2023 08:15:48.169 * Running mode=cluster, port=30004.
+81227:81214:M 14 Dec 2023 08:15:48.169 # Server initialized
+81227:81236:M 14 Dec 2023 08:15:48.169 * Thread 0 alive.
+81227:81238:M 14 Dec 2023 08:15:48.170 * Thread 1 alive.
+
+==> /var/log/keydb-cluster/30005.log <==
+81241:81228:C 14 Dec 2023 08:15:48.174 # oO0OoO0OoO0Oo KeyDB is starting oO0OoO0OoO0Oo
+81241:81228:C 14 Dec 2023 08:15:48.174 # KeyDB version=6.3.4, bits=64, commit=7e7e5e57, modified=0, pid=81241, just started
+81241:81228:C 14 Dec 2023 08:15:48.174 # Configuration loaded
+81241:81228:M 14 Dec 2023 08:15:48.175 * monotonic clock: POSIX clock_gettime
+81241:81228:M 14 Dec 2023 08:15:48.176 * No cluster configuration found, I'm 603cee91acbc03417388956c0acbca2f7f1e5520
+81241:81228:M 14 Dec 2023 08:15:48.177 * Running mode=cluster, port=30005.
+81241:81228:M 14 Dec 2023 08:15:48.177 # Server initialized
+81241:81251:M 14 Dec 2023 08:15:48.178 * Thread 0 alive.
+81241:81252:M 14 Dec 2023 08:15:48.178 * Thread 1 alive.
+
+==> /var/log/keydb-cluster/30006.log <==
+81255:81242:C 14 Dec 2023 08:15:48.182 # oO0OoO0OoO0Oo KeyDB is starting oO0OoO0OoO0Oo
+81255:81242:C 14 Dec 2023 08:15:48.182 # KeyDB version=6.3.4, bits=64, commit=7e7e5e57, modified=0, pid=81255, just started
+81255:81242:C 14 Dec 2023 08:15:48.182 # Configuration loaded
+81255:81242:M 14 Dec 2023 08:15:48.183 * monotonic clock: POSIX clock_gettime
+81255:81242:M 14 Dec 2023 08:15:48.183 * No cluster configuration found, I'm 81907d013ad96ec3911d43cff46157744fe54ee4
+81255:81242:M 14 Dec 2023 08:15:48.185 * Running mode=cluster, port=30006.
+81255:81242:M 14 Dec 2023 08:15:48.185 # Server initialized
+81255:81264:M 14 Dec 2023 08:15:48.185 * Thread 0 alive.
+81255:81265:M 14 Dec 2023 08:15:48.185 * Thread 1 alive.
+```
+
+```
+keydb-cli -p 30001 info
+# Server
+redis_version:6.3.4
+redis_git_sha1:7e7e5e57
+redis_git_dirty:0
+redis_build_id:8e0b8f8680ec0369
+redis_mode:cluster
+os:Linux 4.18.0-477.27.2.el8_8.x86_64 x86_64
+arch_bits:64
+multiplexing_api:epoll
+atomicvar_api:atomic-builtin
+gcc_version:11.2.1
+process_id:81185
+process_supervised:no
+run_id:830224eb5152080144900cb1ef4776ea211ba740
+tcp_port:30001
+server_time_usec:1702542023479624
+uptime_in_seconds:275
+uptime_in_days:0
+hz:10
+configured_hz:10
+lru_clock:8043207
+executable:/usr/local/bin/keydb-server
+config_file:
+availability_zone:
+features:cluster_mget
+
+# Clients
+connected_clients:1
+cluster_connections:0
+maxclients:10000
+client_recent_max_input_buffer:0
+client_recent_max_output_buffer:0
+blocked_clients:0
+tracking_clients:0
+clients_in_timeout_table:0
+current_client_thread:1
+thread_0_clients:0
+thread_1_clients:1
+
+# Memory
+used_memory:2728208
+used_memory_human:2.60M
+used_memory_rss:8499200
+used_memory_rss_human:8.11M
+used_memory_peak:2728208
+used_memory_peak_human:2.60M
+used_memory_peak_perc:100.07%
+used_memory_overhead:2663264
+used_memory_startup:2663256
+used_memory_dataset:64944
+used_memory_dataset_perc:99.99%
+allocator_allocated:3328832
+allocator_active:3784704
+allocator_resident:6819840
+total_system_memory:3998314496
+total_system_memory_human:3.72G
+used_memory_lua:37888
+used_memory_lua_human:37.00K
+used_memory_scripts:0
+used_memory_scripts_human:0B
+number_of_cached_scripts:0
+maxmemory:0
+maxmemory_human:0B
+maxmemory_policy:noeviction
+allocator_frag_ratio:1.14
+allocator_frag_bytes:455872
+allocator_rss_ratio:1.80
+allocator_rss_bytes:3035136
+rss_overhead_ratio:1.25
+rss_overhead_bytes:1679360
+mem_fragmentation_ratio:3.19
+mem_fragmentation_bytes:5834808
+mem_not_counted_for_evict:4
+mem_replication_backlog:0
+mem_clients_slaves:0
+mem_clients_normal:0
+mem_aof_buffer:8
+mem_allocator:jemalloc-5.2.1
+active_defrag_running:0
+lazyfree_pending_objects:0
+lazyfreed_objects:0
+storage_provider:none
+available_system_memory:unavailable
+
+# Persistence
+loading:0
+current_cow_size:0
+current_cow_size_age:0
+current_fork_perc:0.00
+current_save_keys_processed:0
+current_save_keys_total:0
+rdb_changes_since_last_save:0
+rdb_bgsave_in_progress:0
+rdb_last_save_time:1702541748
+rdb_last_bgsave_status:ok
+rdb_last_bgsave_time_sec:-1
+rdb_current_bgsave_time_sec:-1
+rdb_last_cow_size:0
+aof_enabled:1
+aof_rewrite_in_progress:0
+aof_rewrite_scheduled:0
+aof_last_rewrite_time_sec:-1
+aof_current_rewrite_time_sec:-1
+aof_last_bgrewrite_status:ok
+aof_last_write_status:ok
+aof_last_cow_size:0
+module_fork_in_progress:0
+module_fork_last_cow_size:0
+aof_current_size:0
+aof_base_size:0
+aof_pending_rewrite:0
+aof_buffer_length:0
+aof_rewrite_buffer_length:0
+aof_pending_bio_fsync:0
+aof_delayed_fsync:0
+
+# Stats
+total_connections_received:1
+total_commands_processed:0
+instantaneous_ops_per_sec:0
+total_net_input_bytes:14
+total_net_output_bytes:0
+instantaneous_input_kbps:0.00
+instantaneous_output_kbps:0.00
+rejected_connections:0
+sync_full:0
+sync_partial_ok:0
+sync_partial_err:0
+expired_keys:0
+expired_stale_perc:0.00
+expired_time_cap_reached_count:0
+expire_cycle_cpu_milliseconds:2
+evicted_keys:0
+keyspace_hits:0
+keyspace_misses:0
+pubsub_channels:0
+pubsub_patterns:0
+latest_fork_usec:0
+total_forks:0
+migrate_cached_sockets:0
+slave_expires_tracked_keys:0
+active_defrag_hits:0
+active_defrag_misses:0
+active_defrag_key_hits:0
+active_defrag_key_misses:0
+tracking_total_keys:0
+tracking_total_items:0
+tracking_total_prefixes:0
+unexpected_error_replies:0
+total_error_replies:0
+dump_payload_sanitizations:0
+total_reads_processed:1
+total_writes_processed:0
+instantaneous_lock_contention:1
+avg_lock_contention:0.000000
+storage_provider_read_hits:0
+storage_provider_read_misses:0
+
+# Replication
+role:master
+connected_slaves:0
+master_failover_state:no-failover
+master_replid:a035a5b7cb8b28aa35f55ade67cd53555701a108
+master_replid2:0000000000000000000000000000000000000000
+master_repl_offset:0
+second_repl_offset:-1
+repl_backlog_active:0
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:0
+repl_backlog_histlen:0
+
+# CPU
+used_cpu_sys:0.306334
+used_cpu_user:0.463858
+used_cpu_sys_children:0.000000
+used_cpu_user_children:0.000000
+server_threads:2
+long_lock_waits:0
+used_cpu_sys_main_thread:0.058076
+used_cpu_user_main_thread:0.073361
+
+# Modules
+
+# Errorstats
+
+# Cluster
+cluster_enabled:1
+
+# Keyspace
+
+# KeyDB
+mvcc_depth:0
+```
+
+## Create KeyDB Cluster
+
+```
+./centminmod-keydb-create-cluster.sh create
+
+>>> Performing hash slots allocation on 6 nodes...
+Master[0] -> Slots 0 - 5460
+Master[1] -> Slots 5461 - 10922
+Master[2] -> Slots 10923 - 16383
+Adding replica 127.0.0.1:30005 to 127.0.0.1:30001
+Adding replica 127.0.0.1:30006 to 127.0.0.1:30002
+Adding replica 127.0.0.1:30004 to 127.0.0.1:30003
+>>> Trying to optimize slaves allocation for anti-affinity
+[WARNING] Some slaves are in the same host as their master
+M: 2c411c29b604c34a7e65f928adb2677cf5aa7ad8 127.0.0.1:30001
+   slots:[0-5460] (5461 slots) master
+M: a9f6c77f2b51b7926bf180a29dbb45bc54426a95 127.0.0.1:30002
+   slots:[5461-10922] (5462 slots) master
+M: a834ef1507c8ae55c97d1528612de2ec313c5c3f 127.0.0.1:30003
+   slots:[10923-16383] (5461 slots) master
+S: 7be028710efd8db002543fb62c38ef681c736342 127.0.0.1:30004
+   replicates a834ef1507c8ae55c97d1528612de2ec313c5c3f
+S: 603cee91acbc03417388956c0acbca2f7f1e5520 127.0.0.1:30005
+   replicates 2c411c29b604c34a7e65f928adb2677cf5aa7ad8
+S: 81907d013ad96ec3911d43cff46157744fe54ee4 127.0.0.1:30006
+   replicates a9f6c77f2b51b7926bf180a29dbb45bc54426a95
+Can I set the above configuration? (type 'yes' to accept): yes
+
+>>> Nodes configuration updated
+>>> Assign a different config epoch to each node
+>>> Sending CLUSTER MEET messages to join the cluster
+Waiting for the cluster to join
+.
+>>> Performing Cluster Check (using node 127.0.0.1:30001)
+M: 2c411c29b604c34a7e65f928adb2677cf5aa7ad8 127.0.0.1:30001
+   slots:[0-5460] (5461 slots) master
+   1 additional replica(s)
+M: a834ef1507c8ae55c97d1528612de2ec313c5c3f 127.0.0.1:30003
+   slots:[10923-16383] (5461 slots) master
+   1 additional replica(s)
+M: a9f6c77f2b51b7926bf180a29dbb45bc54426a95 127.0.0.1:30002
+   slots:[5461-10922] (5462 slots) master
+   1 additional replica(s)
+S: 603cee91acbc03417388956c0acbca2f7f1e5520 127.0.0.1:30005
+   slots: (0 slots) slave
+   replicates 2c411c29b604c34a7e65f928adb2677cf5aa7ad8
+S: 7be028710efd8db002543fb62c38ef681c736342 127.0.0.1:30004
+   slots: (0 slots) slave
+   replicates a834ef1507c8ae55c97d1528612de2ec313c5c3f
+S: 81907d013ad96ec3911d43cff46157744fe54ee4 127.0.0.1:30006
+   slots: (0 slots) slave
+   replicates a9f6c77f2b51b7926bf180a29dbb45bc54426a95
+[OK] All nodes agree about slots configuration.
+>>> Check for open slots...
+>>> Check slots coverage...
+[OK] All 16384 slots covered.
+```
+
+```
+keydb-cli -p 30001 info
+# Server
+redis_version:6.3.4
+redis_git_sha1:7e7e5e57
+redis_git_dirty:0
+redis_build_id:8e0b8f8680ec0369
+redis_mode:cluster
+os:Linux 4.18.0-477.27.2.el8_8.x86_64 x86_64
+arch_bits:64
+multiplexing_api:epoll
+atomicvar_api:atomic-builtin
+gcc_version:11.2.1
+process_id:81185
+process_supervised:no
+run_id:830224eb5152080144900cb1ef4776ea211ba740
+tcp_port:30001
+server_time_usec:1702542266451594
+uptime_in_seconds:518
+uptime_in_days:0
+hz:10
+configured_hz:10
+lru_clock:8043450
+executable:/usr/local/bin/keydb-server
+config_file:
+availability_zone:
+features:cluster_mget
+
+# Clients
+connected_clients:1
+cluster_connections:10
+maxclients:10000
+client_recent_max_input_buffer:32
+client_recent_max_output_buffer:0
+blocked_clients:0
+tracking_clients:0
+clients_in_timeout_table:0
+current_client_thread:0
+thread_0_clients:2
+thread_1_clients:0
+
+# Memory
+used_memory:3874232
+used_memory_human:3.69M
+used_memory_rss:9060352
+used_memory_rss_human:8.64M
+used_memory_peak:3913472
+used_memory_peak_human:3.73M
+used_memory_peak_perc:99.00%
+used_memory_overhead:3732352
+used_memory_startup:2663256
+used_memory_dataset:141880
+used_memory_dataset_perc:11.72%
+allocator_allocated:4624368
+allocator_active:5419008
+allocator_resident:8507392
+total_system_memory:3998314496
+total_system_memory_human:3.72G
+used_memory_lua:37888
+used_memory_lua_human:37.00K
+used_memory_scripts:0
+used_memory_scripts_human:0B
+number_of_cached_scripts:0
+maxmemory:0
+maxmemory_human:0B
+maxmemory_policy:noeviction
+allocator_frag_ratio:1.17
+allocator_frag_bytes:794640
+allocator_rss_ratio:1.57
+allocator_rss_bytes:3088384
+rss_overhead_ratio:1.06
+rss_overhead_bytes:552960
+mem_fragmentation_ratio:2.38
+mem_fragmentation_bytes:5249936
+mem_not_counted_for_evict:4
+mem_replication_backlog:1048576
+mem_clients_slaves:20512
+mem_clients_normal:0
+mem_aof_buffer:8
+mem_allocator:jemalloc-5.2.1
+active_defrag_running:0
+lazyfree_pending_objects:0
+lazyfreed_objects:0
+storage_provider:none
+available_system_memory:unavailable
+
+# Persistence
+loading:0
+current_cow_size:0
+current_cow_size_age:0
+current_fork_perc:0.00
+current_save_keys_processed:0
+current_save_keys_total:0
+rdb_changes_since_last_save:0
+rdb_bgsave_in_progress:0
+rdb_last_save_time:1702542113
+rdb_last_bgsave_status:ok
+rdb_last_bgsave_time_sec:0
+rdb_current_bgsave_time_sec:-1
+rdb_last_cow_size:647168
+aof_enabled:1
+aof_rewrite_in_progress:0
+aof_rewrite_scheduled:0
+aof_last_rewrite_time_sec:-1
+aof_current_rewrite_time_sec:-1
+aof_last_bgrewrite_status:ok
+aof_last_write_status:ok
+aof_last_cow_size:0
+module_fork_in_progress:0
+module_fork_last_cow_size:0
+aof_current_size:0
+aof_base_size:0
+aof_pending_rewrite:0
+aof_buffer_length:0
+aof_rewrite_buffer_length:0
+aof_pending_bio_fsync:0
+aof_delayed_fsync:0
+
+# Stats
+total_connections_received:4
+total_commands_processed:169
+instantaneous_ops_per_sec:1
+total_net_input_bytes:59526
+total_net_output_bytes:21420
+instantaneous_input_kbps:0.04
+instantaneous_output_kbps:0.00
+rejected_connections:0
+sync_full:1
+sync_partial_ok:0
+sync_partial_err:1
+expired_keys:0
+expired_stale_perc:0.00
+expired_time_cap_reached_count:0
+expire_cycle_cpu_milliseconds:4
+evicted_keys:0
+keyspace_hits:0
+keyspace_misses:0
+pubsub_channels:0
+pubsub_patterns:0
+latest_fork_usec:786
+total_forks:1
+migrate_cached_sockets:0
+slave_expires_tracked_keys:0
+active_defrag_hits:0
+active_defrag_misses:0
+active_defrag_key_hits:0
+active_defrag_key_misses:0
+tracking_total_keys:0
+tracking_total_items:0
+tracking_total_prefixes:0
+unexpected_error_replies:0
+total_error_replies:0
+dump_payload_sanitizations:0
+total_reads_processed:174
+total_writes_processed:31
+instantaneous_lock_contention:1
+avg_lock_contention:0.125000
+storage_provider_read_hits:0
+storage_provider_read_misses:0
+
+# Replication
+role:master
+connected_slaves:1
+slave0:ip=127.0.0.1,port=30005,state=online,offset=233,lag=1
+master_failover_state:no-failover
+master_replid:1d789d444625817325c702a6357f858b085bef6a
+master_replid2:0000000000000000000000000000000000000000
+master_repl_offset:233
+second_repl_offset:-1
+repl_backlog_active:1
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:1
+repl_backlog_histlen:233
+
+# CPU
+used_cpu_sys:0.654101
+used_cpu_user:0.918530
+used_cpu_sys_children:0.000000
+used_cpu_user_children:0.002029
+server_threads:2
+long_lock_waits:0
+used_cpu_sys_main_thread:0.356825
+used_cpu_user_main_thread:0.563670
+
+# Modules
+
+# Errorstats
+
+# Cluster
+cluster_enabled:1
+
+# Keyspace
+
+# KeyDB
+mvcc_depth:0
+```
+
+```
+keydb-cli -p 30001 cluster nodes
+
+a834ef1507c8ae55c97d1528612de2ec313c5c3f 127.0.0.1:30003@40003 master - 0 1702542686133 3 connected 10923-16383
+a9f6c77f2b51b7926bf180a29dbb45bc54426a95 127.0.0.1:30002@40002 master - 0 1702542686434 2 connected 5461-10922
+603cee91acbc03417388956c0acbca2f7f1e5520 127.0.0.1:30005@40005 slave 2c411c29b604c34a7e65f928adb2677cf5aa7ad8 0 1702542686133 1 connected
+7be028710efd8db002543fb62c38ef681c736342 127.0.0.1:30004@40004 slave a834ef1507c8ae55c97d1528612de2ec313c5c3f 0 1702542686133 3 connected
+2c411c29b604c34a7e65f928adb2677cf5aa7ad8 127.0.0.1:30001@40001 myself,master - 0 1702542685000 1 connected 0-5460
+81907d013ad96ec3911d43cff46157744fe54ee4 127.0.0.1:30006@40006 slave a9f6c77f2b51b7926bf180a29dbb45bc54426a95 0 1702542686434 2 connected
+```
+
+## KeyDB benchmarks
+
+### KeyDB benchmarks - 1 thread
+
+```
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 30001 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
+
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+server 127.0.0.1:30001 handle error response: -MOVED 10933 127.0.0.1:30003
+server 127.0.0.1:30001 handle error response: -MOVED 8867 127.0.0.1:30002
+server 127.0.0.1:30001 handle error response: -MOVED 7768 127.0.0.1:30002
+```
+
+### KeyDB benchmarks - 2 threads
+
+```
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 30001 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
+
+```
+
+### KeyDB benchmarks - 3 threads
+
+```
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 30001 --protocol=redis -t 3 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
+
+```
