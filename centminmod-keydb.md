@@ -63,6 +63,388 @@ Sentinel mode:
 ```
 
 ```
+keydb-cli -p 7379 info
+# Server
+redis_version:6.3.4
+redis_git_sha1:7e7e5e57
+redis_git_dirty:0
+redis_build_id:8e0b8f8680ec0369
+redis_mode:standalone
+os:Linux 4.18.0-477.27.2.el8_8.x86_64 x86_64
+arch_bits:64
+multiplexing_api:epoll
+atomicvar_api:atomic-builtin
+gcc_version:11.2.1
+process_id:78054
+process_supervised:systemd
+run_id:34995c484792a84ae5ae5b8ce79b8d7d2673c403
+tcp_port:7379
+server_time_usec:1702564566142608
+uptime_in_seconds:28646
+uptime_in_days:0
+hz:10
+configured_hz:10
+lru_clock:8065750
+executable:/usr/local/bin/keydb-server
+config_file:/etc/keydb/keydb.conf
+availability_zone:
+features:cluster_mget
+
+# Clients
+connected_clients:1
+cluster_connections:0
+maxclients:10000
+client_recent_max_input_buffer:0
+client_recent_max_output_buffer:0
+blocked_clients:0
+tracking_clients:0
+clients_in_timeout_table:0
+current_client_thread:0
+thread_0_clients:1
+thread_1_clients:0
+
+# Memory
+used_memory:69355280
+used_memory_human:66.14M
+used_memory_rss:84082688
+used_memory_rss_human:80.19M
+used_memory_peak:73544864
+used_memory_peak_human:70.14M
+used_memory_peak_perc:94.30%
+used_memory_overhead:35664920
+used_memory_startup:2004504
+used_memory_dataset:33690360
+used_memory_dataset_perc:50.02%
+allocator_allocated:69735592
+allocator_active:71081984
+allocator_resident:75075584
+total_system_memory:3998314496
+total_system_memory_human:3.72G
+used_memory_lua:37888
+used_memory_lua_human:37.00K
+used_memory_scripts:0
+used_memory_scripts_human:0B
+number_of_cached_scripts:0
+maxmemory:0
+maxmemory_human:0B
+maxmemory_policy:noeviction
+allocator_frag_ratio:1.02
+allocator_frag_bytes:1346392
+allocator_rss_ratio:1.06
+allocator_rss_bytes:3993600
+rss_overhead_ratio:1.12
+rss_overhead_bytes:9007104
+mem_fragmentation_ratio:1.21
+mem_fragmentation_bytes:14791200
+mem_not_counted_for_evict:0
+mem_replication_backlog:0
+mem_clients_slaves:0
+mem_clients_normal:0
+mem_aof_buffer:0
+mem_allocator:jemalloc-5.2.1
+active_defrag_running:0
+lazyfree_pending_objects:0
+lazyfreed_objects:0
+storage_provider:none
+available_system_memory:unavailable
+
+# Persistence
+loading:0
+current_cow_size:0
+current_cow_size_age:0
+current_fork_perc:0.00
+current_save_keys_processed:0
+current_save_keys_total:0
+rdb_changes_since_last_save:0
+rdb_bgsave_in_progress:0
+rdb_last_save_time:1702548097
+rdb_last_bgsave_status:ok
+rdb_last_bgsave_time_sec:0
+rdb_current_bgsave_time_sec:-1
+rdb_last_cow_size:966656
+aof_enabled:0
+aof_rewrite_in_progress:0
+aof_rewrite_scheduled:0
+aof_last_rewrite_time_sec:-1
+aof_current_rewrite_time_sec:-1
+aof_last_bgrewrite_status:ok
+aof_last_write_status:ok
+aof_last_cow_size:0
+module_fork_in_progress:0
+module_fork_last_cow_size:0
+
+# Stats
+total_connections_received:1633
+total_commands_processed:33024335
+instantaneous_ops_per_sec:0
+total_net_input_bytes:1145874838
+total_net_output_bytes:236386727
+instantaneous_input_kbps:0.00
+instantaneous_output_kbps:0.00
+rejected_connections:0
+sync_full:0
+sync_partial_ok:0
+sync_partial_err:0
+expired_keys:0
+expired_stale_perc:0.00
+expired_time_cap_reached_count:0
+expire_cycle_cpu_milliseconds:231
+evicted_keys:0
+keyspace_hits:11518840
+keyspace_misses:1983914
+pubsub_channels:0
+pubsub_patterns:0
+latest_fork_usec:2254
+total_forks:11
+migrate_cached_sockets:0
+slave_expires_tracked_keys:0
+active_defrag_hits:0
+active_defrag_misses:0
+active_defrag_key_hits:0
+active_defrag_key_misses:0
+tracking_total_keys:0
+tracking_total_items:0
+tracking_total_prefixes:0
+unexpected_error_replies:0
+total_error_replies:6
+dump_payload_sanitizations:0
+total_reads_processed:9115994
+total_writes_processed:9114361
+instantaneous_lock_contention:1
+avg_lock_contention:0.000000
+storage_provider_read_hits:0
+storage_provider_read_misses:0
+
+# Replication
+role:master
+connected_slaves:0
+master_failover_state:no-failover
+master_replid:d2c898ed02e6e50a1ddf1da86f068b5096cd2d2f
+master_replid2:0000000000000000000000000000000000000000
+master_repl_offset:0
+second_repl_offset:-1
+repl_backlog_active:0
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:0
+repl_backlog_histlen:0
+
+# CPU
+used_cpu_sys:109.192300
+used_cpu_user:107.051355
+used_cpu_sys_children:0.066978
+used_cpu_user_children:0.680582
+server_threads:2
+long_lock_waits:0
+used_cpu_sys_main_thread:52.958606
+used_cpu_user_main_thread:71.208860
+
+# Modules
+
+# Errorstats
+errorstat_ERR:count=6
+
+# Cluster
+cluster_enabled:0
+
+# Keyspace
+db0:keys=526496,expires=0,avg_ttl=0,cached_keys=526496
+
+# KeyDB
+mvcc_depth:0
+```
+
+## info explained
+
+- **Server Section**
+  - `redis_version`: The version of Redis server.
+  - `redis_git_sha1`: The Git SHA1 hash of the Redis server source code.
+  - `redis_git_dirty`: Indicates if the Git repository had modified files (0 for no, 1 for yes).
+  - `redis_build_id`: A unique identifier for the Redis server build.
+  - `redis_mode`: Operating mode of Redis (e.g., standalone, cluster).
+  - `os`: Operating system and version.
+  - `arch_bits`: Architecture bits (e.g., 32 or 64).
+  - `multiplexing_api`: The event multiplexing API used.
+  - `atomicvar_api`: The atomic variables API used.
+  - `gcc_version`: Version of the GCC compiler used.
+  - `process_id`: Process ID of the Redis server.
+  - `process_supervised`: Supervision system used (e.g., systemd).
+  - `run_id`: Unique identifier of the server run.
+  - `tcp_port`: TCP port on which Redis is running.
+  - `server_time_usec`: Server time in microseconds.
+  - `uptime_in_seconds`: Server uptime in seconds.
+  - `uptime_in_days`: Server uptime in days.
+  - `hz`: Server frequency for internal tasks.
+  - `configured_hz`: Configured server frequency.
+  - `lru_clock`: Clock value for LRU management.
+  - `executable`: Path to the Redis server executable.
+  - `config_file`: Path to the Redis configuration file.
+  - `availability_zone`: Availability zone of the server.
+  - `features`: Enabled features like cluster_mget.
+
+- **Clients Section**
+  - `connected_clients`: Number of client connections.
+  - `cluster_connections`: Number of connections in the cluster.
+  - `maxclients`: Maximum number of clients allowed.
+  - `client_recent_max_input_buffer`: Largest input buffer among recent clients.
+  - `client_recent_max_output_buffer`: Largest output buffer among recent clients.
+  - `blocked_clients`: Number of clients blocked by certain commands.
+  - `tracking_clients`: Number of clients being tracked.
+  - `clients_in_timeout_table`: Number of clients in the timeout table.
+  - `current_client_thread`: Current client thread number.
+  - `thread_0_clients`: Number of clients in thread 0.
+  - `thread_1_clients`: Number of clients in thread 1.
+
+- **Memory Section**
+  - `used_memory`: Total memory used by Redis in bytes.
+  - `used_memory_human`: Human-readable format of used memory.
+  - `used_memory_rss`: Resident Set Size memory used.
+  - `used_memory_rss_human`: Human-readable RSS memory used.
+  - `used_memory_peak`: Peak memory consumed by Redis.
+  - `used_memory_peak_human`: Human-readable peak memory.
+  - `used_memory_peak_perc`: Percentage of peak used memory.
+  - `used_memory_overhead`: Overhead used by Redis for internal mechanisms.
+  - `used_memory_startup`: Memory used at startup.
+  - `used_memory_dataset`: Memory used for storing data.
+  - `used_memory_dataset_perc`: Percentage of memory used for data.
+  - `allocator_allocated`: Memory allocated by the allocator.
+  - `allocator_active`: Active memory in the allocator.
+  - `allocator_resident`: Resident size in the allocator.
+  - `total_system_memory`: Total memory available in the system.
+  - `total_system_memory_human`: Human-readable total system memory.
+  - `used_memory_lua`: Memory used by the Lua engine.
+  - `used_memory_lua_human`: Human-readable Lua memory usage.
+  - `used_memory_scripts`: Memory used by scripts.
+  - `used_memory_scripts_human`: Human-readable script memory usage.
+  - `number_of_cached_scripts`: Number of scripts cached.
+  - `maxmemory`: Maximum memory limit set.
+  - `maxmemory_human`: Human-readable maximum memory limit.
+  - `maxmemory_policy`: Eviction policy when maxmemory is reached.
+  - `allocator_frag_ratio`: Fragmentation ratio of the allocator.
+  - `allocator_frag_bytes`: Fragmentation bytes in the allocator.
+  - `allocator_rss_ratio`: RSS ratio of the allocator.
+  - `allocator_rss_bytes`: RSS bytes in the allocator.
+  - `rss_overhead_ratio`: Ratio of RSS overhead.
+  - `rss_overhead_bytes`: Bytes of RSS overhead.
+  - `mem_fragmentation_ratio`: Memory fragmentation ratio.
+  - `mem_fragmentation_bytes`: Bytes of memory fragmentation.
+  - `mem_not_counted_for_evict`: Memory not counted for eviction.
+  - `mem_replication_backlog`: Size of replication backlog.
+  - `mem_clients_slaves`: Memory used by slave clients.
+  - `mem_clients_normal`: Memory used by normal clients.
+  - `mem_aof_buffer`: Memory used by AOF buffer.
+  - `mem_allocator`: Memory allocator being used.
+  - `active_defrag_running`: Indicates if active defragmentation is running.
+  - `lazyfree_pending_objects`: Pending objects for lazy freeing.
+  - `lazyfreed_objects`: Number of objects lazy freed.
+  - `storage_provider`: Storage provider used.
+  - `available_system_memory`: Available system memory.
+
+- **Persistence Section**
+  - `loading`: Indicates if the database is loading from disk.
+  - `current_cow_size`: Size of copy-on-write memory during last operation.
+  - `current_cow_size_age`: Age of the current copy-on-write size.
+  - `current_fork_perc`: Percentage of the last fork operation completed.
+  - `current_save_keys_processed`: Keys processed in the current save.
+  - `current_save_keys_total`: Total keys to process in the current save.
+  - `rdb_changes_since_last_save`: Changes since the last RDB save.
+  - `rdb_bgsave_in_progress`: Indicates if a background save is in progress.
+  - `rdb_last_save_time`: Timestamp of the last RDB save.
+  - `rdb_last_bgsave_status`: Status of the last background save.
+  - `rdb_last_bgsave_time_sec`: Time taken for the last background save.
+  - `rdb_current_bgsave_time_sec`: Time for the current background save.
+  - `rdb_last_cow_size`: Size of the last copy-on-write operation.
+  - `aof_enabled`: Indicates if AOF (Append Only File) is enabled.
+  - `aof_rewrite_in_progress`: Indicates if an AOF rewrite is in progress.
+  - `aof_rewrite_scheduled`: Indicates if an AOF rewrite is scheduled.
+  - `aof_last_rewrite_time_sec`: Time taken for the last AOF rewrite.
+  - `aof_current_rewrite_time_sec`: Time for the current AOF rewrite.
+  - `aof_last_bgrewrite_status`: Status of the last AOF background rewrite.
+  - `aof_last_write_status`: Status of the last AOF write.
+  - `aof_last_cow_size`: Size of the last AOF copy-on-write operation.
+  - `module_fork_in_progress`: Indicates if a module fork is in progress.
+  - `module_fork_last_cow_size`: Last copy-on-write size for a module fork.
+
+- **Stats Section**
+  - `total_connections_received`: Total number of connections received.
+  - `total_commands_processed`: Total number of commands processed.
+  - `instantaneous_ops_per_sec`: Operations per second currently executed.
+  - `total_net_input_bytes`: Total number of bytes received.
+  - `total_net_output_bytes`: Total number of bytes sent.
+  - `instantaneous_input_kbps`: Network input rate in KB per second.
+  - `instantaneous_output_kbps`: Network output rate in KB per second.
+  - `rejected_connections`: Number of connections rejected.
+  - `sync_full`: Number of full syncs with replicas.
+  - `sync_partial_ok`: Number of successful partial syncs.
+  - `sync_partial_err`: Number of partial syncs with errors.
+  - `expired_keys`: Number of expired keys.
+  - `expired_stale_perc`: Percentage of expired stale keys.
+  - `expired_time_cap_reached_count`: Counts when expiration time cap is reached.
+  - `expire_cycle_cpu_milliseconds`: CPU time spent in expiration cycles.
+  - `evicted_keys`: Number of keys evicted.
+  - `keyspace_hits`: Number of successful lookups in the main dictionary.
+  - `keyspace_misses`: Number of failed lookups in the main dictionary.
+  - `pubsub_channels`: Number of active Pub/Sub channels.
+  - `pubsub_patterns`: Number of active Pub/Sub patterns.
+  - `latest_fork_usec`: Duration of the latest fork operation in microseconds.
+  - `total_forks`: Total number of fork operations.
+  - `migrate_cached_sockets`: Number of cached sockets in migrate.
+  - `slave_expires_tracked_keys`: Tracked keys for slave expiration.
+  - `active_defrag_hits`: Hits during active defragmentation.
+  - `active_defrag_misses`: Misses during active defragmentation.
+  - `active_defrag_key_hits`: Key hits during active defragmentation.
+  - `active_defrag_key_misses`: Key misses during active defragmentation.
+  - `tracking_total_keys`: Total number of keys tracked.
+  - `tracking_total_items`: Total number of items tracked.
+  - `tracking_total_prefixes`: Total number of prefixes tracked.
+  - `unexpected_error_replies`: Number of unexpected error replies.
+  - `total_error_replies`: Total number of error replies.
+  - `dump_payload_sanitizations`: Number of dump payload sanitizations.
+  - `total_reads_processed`: Total number of read operations processed.
+  - `total_writes_processed`: Total number of write operations processed.
+  - `instantaneous_lock_contention`: The current number of lock contentions.
+  - `avg_lock_contention`: The average number of lock contentions.
+  - `storage_provider_read_hits`: Number of successful read operations from the storage provider.
+  - `storage_provider_read_misses`: Number of read operations that failed to retrieve data from the storage provider.
+
+- **Replication Section**
+  - `role`: The role of the server in the replication setup, such as master.
+  - `connected_slaves`: Number of slave servers connected to this master.
+  - `master_failover_state`: The state of failover in the master-slave setup.
+  - `master_replid`: A unique identifier for the master replication.
+  - `master_replid2`: A secondary replication ID for the master.
+  - `master_repl_offset`: The offset in the replication stream.
+  - `second_repl_offset`: The offset for a secondary replication stream.
+  - `repl_backlog_active`: Indicates if the replication backlog is active.
+  - `repl_backlog_size`: Size of the replication backlog.
+  - `repl_backlog_first_byte_offset`: The offset of the first byte in the replication backlog.
+  - `repl_backlog_histlen`: Length of the historical data in the replication backlog.
+
+- **CPU Section**
+  - `used_cpu_sys`: Total system CPU time used.
+  - `used_cpu_user`: Total user CPU time used.
+  - `used_cpu_sys_children`: System CPU time used by child processes.
+  - `used_cpu_user_children`: User CPU time used by child processes.
+  - `server_threads`: Number of server threads.
+  - `long_lock_waits`: Number of long lock waits.
+  - `used_cpu_sys_main_thread`: System CPU time used by the main thread.
+  - `used_cpu_user_main_thread`: User CPU time used by the main thread.
+
+- **Modules Section**
+  - This section will list any modules loaded into the KeyDB instance, but it appears to be empty in this case.
+
+- **Errorstats Section**
+  - `errorstat_ERR`: An object containing error statistics, in this case, the count of ERR errors.
+
+- **Cluster Section**
+  - `cluster_enabled`: Indicates if the cluster mode is enabled (1 for enabled, 0 for disabled).
+
+- **Keyspace Section**
+  - `db0`: Information about database 0, including the number of keys, how many have expiration set, the average time-to-live (TTL) for keys, and the number of cached keys.
+
+- **KeyDB Specific**
+  - `mvcc_depth`: The depth of Multi-Version Concurrency Control, specific to KeyDB.
+
+```
 keydb-cli -p 7379 CONFIG GET "*"
   1) "rdbchecksum"
   2) "yes"
