@@ -64,16 +64,16 @@ Sentinel mode:
 
 # Benchmarks
 
-`memtier_benchmark` comparing Redis vs KeyDB for 1, 2, 3 threads on 4 CPU core KVM VPS running AlmaLinux 8 with Centmin Mod 130.00beta01 LEMP stack.
+`memtier_benchmark` comparing Redis 7.2.3 vs KeyDB 6.3.4 for 1, 2, 3 threads on 4 CPU core KVM VPS running AlmaLinux 8 with Centmin Mod 130.00beta01 LEMP stack.
 
 | Database | Threads | Sets (ops/sec) | Gets (ops/sec) | Totals (ops/sec) | 
 |-|-|-|-|-|
-| KeyDB | 1 | 7770.48 | 116557.14 | 124327.62 |
-| KeyDB | 2 | 14650.89 | 219763.35 | 234414.24 |  
-| KeyDB | 3 | 16959.49 | 254392.40 | 271351.89 |
-| Redis | 1 | 7404.66 | 111069.97 | 118474.64 |
-| Redis | 2 | 10338.26 | 155073.83 | 165412.08 |
-| Redis | 3 | 6660.16 | 99902.42 | 106562.59 |
+| KeyDB 6.3.4 | 1 | 7770.48 | 116557.14 | 124327.62 |
+| KeyDB 6.3.4 | 2 | 14650.89 | 219763.35 | 234414.24 |  
+| KeyDB 6.3.4 | 3 | 16959.49 | 254392.40 | 271351.89 |
+| Redis 7.2.3 | 1 | 7404.66 | 111069.97 | 118474.64 |
+| Redis 7.2.3 | 2 | 10338.26 | 155073.83 | 165412.08 |
+| Redis 7.2.3 | 3 | 6660.16 | 99902.42 | 106562.59 |
 
 ```
 lscpu
@@ -113,6 +113,27 @@ Low:           3813        2435        1377
 High:             0           0           0
 Swap:          4095        1702        2393
 Total:         7909        3306        3771
+```
+```
+cat /etc/os-release 
+NAME="AlmaLinux"
+VERSION="8.9 (Midnight Oncilla)"
+ID="almalinux"
+ID_LIKE="rhel centos fedora"
+VERSION_ID="8.9"
+PLATFORM_ID="platform:el8"
+PRETTY_NAME="AlmaLinux 8.9 (Midnight Oncilla)"
+ANSI_COLOR="0;34"
+LOGO="fedora-logo-icon"
+CPE_NAME="cpe:/o:almalinux:almalinux:8::baseos"
+HOME_URL="https://almalinux.org/"
+DOCUMENTATION_URL="https://wiki.almalinux.org/"
+BUG_REPORT_URL="https://bugs.almalinux.org/"
+
+ALMALINUX_MANTISBT_PROJECT="AlmaLinux-8"
+ALMALINUX_MANTISBT_PROJECT_VERSION="8.9"
+REDHAT_SUPPORT_PRODUCT="AlmaLinux"
+REDHAT_SUPPORT_PRODUCT_VERSION="8.9"
 ```
 
 ## KeyDB benchmark - 1 thread
