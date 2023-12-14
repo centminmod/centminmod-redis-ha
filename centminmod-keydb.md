@@ -894,26 +894,74 @@ a9f6c77f2b51b7926bf180a29dbb45bc54426a95 127.0.0.1:30002@40002 master - 0 170254
 ### KeyDB benchmarks - 1 thread
 
 ```
-memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 30001 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 30001 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 --cluster-mode
 
 Writing results to stdout
 [RUN #1] Preparing benchmark client...
 [RUN #1] Launching threads now...
-server 127.0.0.1:30001 handle error response: -MOVED 10933 127.0.0.1:30003
-server 127.0.0.1:30001 handle error response: -MOVED 8867 127.0.0.1:30002
-server 127.0.0.1:30001 handle error response: -MOVED 7768 127.0.0.1:30002
+[RUN #1 47%,   0 secs]  1 threads:       94092 ops,   95788 (avg:   95788) o[RUN #1 98%,   1 secs]  1 threads:      195217 ops,  101120 (avg:   98478) o[RUN #1 100%,   2 secs]  0 threads:      200000 ops,  101120 (avg:   98317) ops/sec, 6.25MB/sec (avg: 6.08MB/sec),  2.93 (avg:  3.00) msec latency
+
+1         Threads
+100       Connections per thread
+2000      Requests per client
+
+
+ALL STATS
+======================================================================================================================================================
+Type         Ops/sec     Hits/sec   Misses/sec    MOVED/sec      ASK/sec    Avg. Latency     p50 Latency     p99 Latency   p99.9 Latency       KB/sec 
+------------------------------------------------------------------------------------------------------------------------------------------------------
+Sets         6144.77          ---          ---         0.00         0.00         3.04864         2.75100         5.56700        16.76700      2591.66 
+Gets        92171.56       117.49     92054.07         0.00         0.00         2.99752         2.75100         4.89500         8.06300      3634.86 
+Waits           0.00          ---          ---          ---          ---             ---             ---             ---             ---          --- 
+Totals      98316.33       117.49     92054.07         0.00         0.00         3.00071         2.75100         4.89500         8.15900      6226.53
 ```
 
 ### KeyDB benchmarks - 2 threads
 
 ```
-memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 30001 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 30001 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 --cluster-mode
 
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 50%,   0 secs]  2 threads:      199260 ops,  204559 (avg:  204559) o[RUN #1 95%,   1 secs]  2 threads:      378952 ops,  179701 (avg:  191967) o[RUN #1 100%,   2 secs]  0 threads:      400000 ops,  179701 (avg:  192928) ops/sec, 11.17MB/sec (avg: 12.01MB/sec),  3.13 (avg:  2.94) msec latency
+
+2         Threads
+100       Connections per thread
+2000      Requests per client
+
+
+ALL STATS
+======================================================================================================================================================
+Type         Ops/sec     Hits/sec   Misses/sec    MOVED/sec      ASK/sec    Avg. Latency     p50 Latency     p99 Latency   p99.9 Latency       KB/sec 
+------------------------------------------------------------------------------------------------------------------------------------------------------
+Sets        15613.65          ---          ---         0.00         0.00         2.97576         2.35100        12.92700        29.69500      6585.34 
+Gets       234204.76       586.45    233618.31         0.00         0.00         2.93380         2.33500        12.60700        30.07900      9344.89 
+Waits           0.00          ---          ---          ---          ---             ---             ---             ---             ---          --- 
+Totals     249818.41       586.45    233618.31         0.00         0.00         2.93642         2.33500        12.60700        30.07900     15930.23
 ```
 
 ### KeyDB benchmarks - 3 threads
 
 ```
-memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 30001 --protocol=redis -t 3 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 30001 --protocol=redis -t 3 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384 --cluster-mode
 
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 29%,   0 secs]  3 threads:      175345 ops,  181056 (avg:  181056) o[RUN #1 64%,   1 secs]  3 threads:      385501 ops,  208996 (avg:  195289) o[RUN #1 93%,   2 secs]  1 threads:      556200 ops,  208996 (avg:  197411) o[RUN #1 100%,   2 secs]  0 threads:      600000 ops,  208996 (avg:  203420) ops/sec, 13.10MB/sec (avg: 12.75MB/sec),  4.05 (avg:  3.93) msec latency
+
+3         Threads
+100       Connections per thread
+2000      Requests per client
+
+
+ALL STATS
+======================================================================================================================================================
+Type         Ops/sec     Hits/sec   Misses/sec    MOVED/sec      ASK/sec    Avg. Latency     p50 Latency     p99 Latency   p99.9 Latency       KB/sec 
+------------------------------------------------------------------------------------------------------------------------------------------------------
+Sets        14466.26          ---          ---         0.00         0.00         3.94049         2.41500        18.81500        34.55900      6101.42 
+Gets       216993.96       790.44    216203.53         0.00         0.00         3.93215         2.39900        18.68700        34.81500      8751.52 
+Waits           0.00          ---          ---          ---          ---             ---             ---             ---             ---          --- 
+Totals     231460.23       790.44    216203.53         0.00         0.00         3.93267         2.39900        18.68700        34.81500     14852.95
 ```
