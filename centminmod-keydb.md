@@ -62,6 +62,96 @@ Sentinel mode:
        ./keydb-server /etc/sentinel.conf --sentinel
 ```
 
+* https://docs.keydb.dev/docs/clients#client-command
+
+```
+keydb-cli -p 7379 client list
+
+id=1608 addr=127.0.0.1:3708 laddr=127.0.0.1:7379 fd=16 name= age=0 idle=0 flags=N db=0 sub=0 psub=0 multi=-1 qbuf=0 qbuf-free=40954 argv-mem=10 obl=0 oll=0 omem=0 tot-mem=61466 events=r cmd=client user=default redir=-1
+```
+
+* addr: The client address, that is, the client IP and the remote port number it used to connect with the KeyDB server.
+* fd: The client socket file descriptor number.
+* name: The client name as set by CLIENT SETNAME.
+* age: The number of seconds the connection existed for.
+* idle: The number of seconds the connection is idle.
+* flags: The kind of client (N means normal client, check the full list of flags).
+* omem: The amount of memory used by the client for the output buffer.
+* cmd: The last executed command.
+
+* https://docs.keydb.dev/docs/keydbcli#continuous-stats-mode
+
+```
+keydb-cli -p 7379 --stat
+
+------- data ------ --------------------- load -------------------- - child -
+keys       mem      clients blocked requests            connections          
+37735      21.35M   1       0       9016263 (+0)        1606        
+37735      21.35M   1       0       9016264 (+1)        1606        
+37735      21.31M   1       0       9016265 (+1)        1606        
+37735      21.35M   1       0       9016266 (+1)        1606        
+37735      21.35M   1       0       9016267 (+1)        1606        
+37735      21.35M   1       0       9016268 (+1)        1606        
+37735      21.35M   1       0       9016269 (+1)        1606 
+```
+
+* https://docs.keydb.dev/docs/keydbcli#getting-a-list-of-keys
+
+```
+keydb-cli -p 7379 --scan | head -10
+
+memtier-1606458
+memtier-6479553
+memtier-2941025
+memtier-2185768
+memtier-5764374
+memtier-2183674
+memtier-8892962
+memtier-5465745
+memtier-3102119
+memtier-770598
+```
+
+* https://docs.keydb.dev/docs/keydbcli#monitoring-the-latency-of-keydb-instances
+
+```
+keydb-cli -p 7379 --latency
+
+min: 0, max: 30, avg: 0.13 (1995 samples
+```
+
+```
+keydb-cli -p 7379 --intrinsic-latency 5
+
+Max latency so far: 1 microseconds.
+Max latency so far: 51 microseconds.
+Max latency so far: 85 microseconds.
+Max latency so far: 89 microseconds.
+Max latency so far: 1973 microseconds.
+Max latency so far: 2218 microseconds.
+
+83769366 total runs (avg latency: 0.0597 microseconds / 59.69 nanoseconds per run).
+Worst run took 37160x longer than the average latency.
+```
+
+* https://docs.keydb.dev/docs/keydbcli#performing-an-lru-simulation
+
+```
+keydb-cli -p 7379 --lru-test 100000
+
+202500 Gets/sec | Hits: 163611 (80.80%) | Misses: 38889 (19.20%)
+212750 Gets/sec | Hits: 205915 (96.79%) | Misses: 6835 (3.21%)
+203500 Gets/sec | Hits: 200112 (98.34%) | Misses: 3388 (1.66%)
+219000 Gets/sec | Hits: 216539 (98.88%) | Misses: 2461 (1.12%)
+207250 Gets/sec | Hits: 205562 (99.19%) | Misses: 1688 (0.81%)
+209000 Gets/sec | Hits: 207689 (99.37%) | Misses: 1311 (0.63%)
+220000 Gets/sec | Hits: 218808 (99.46%) | Misses: 1192 (0.54%)
+213000 Gets/sec | Hits: 212051 (99.55%) | Misses: 949 (0.45%)
+221000 Gets/sec | Hits: 220160 (99.62%) | Misses: 840 (0.38%)
+201000 Gets/sec | Hits: 200295 (99.65%) | Misses: 705 (0.35%)
+210750 Gets/sec | Hits: 210147 (99.71%) | Misses: 603 (0.29%)
+```
+
 ## KeyDB Diagnostic Tool
 
 * https://docs.keydb.dev/docs/keydbdiagnostictool
@@ -980,4 +1070,17 @@ Sets        14466.26          ---          ---         0.00         0.00        
 Gets       216993.96       790.44    216203.53         0.00         0.00         3.93215         2.39900        18.68700        34.81500      8751.52 
 Waits           0.00          ---          ---          ---          ---             ---             ---             ---             ---          --- 
 Totals     231460.23       790.44    216203.53         0.00         0.00         3.93267         2.39900        18.68700        34.81500     14852.95
+```
+
+### KeyDB Cluster Diagnostics
+
+```
+keydb-diagnostic-tool -h 127.0.0.1 -p 30001 2>&1 | tee keydb-dignostic1.log
+
+Server has 2 threads.
+Starting...
+1 threads, 50 total clients. CPU Usage Self: 95.5% (95.5% per thread), Serve2 threads, 100 total clients. CPU Usage Self: 186.6% (93.3% per thread), Ser3 threads, 150 total clients. CPU Usage Self: 259.4% (86.5% per thread), Ser4 threads, 200 total clients. CPU Usage Self: 259.8% (64.9% per thread), Ser5 threads, 250 total clients. CPU Usage Self: 306.4% (61.3% per thread), Ser6 threads, 300 total clients. CPU Usage Self: 365.8% (61.0% per thread), Server: 1.1% (0.5% per thread)
+Server CPU load appears to have stagnated with increasing clients.
+Server does not appear to be at full load. Check network for throughput.
+Done.
 ```
