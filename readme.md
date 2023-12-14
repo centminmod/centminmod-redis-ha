@@ -1,3 +1,22 @@
+# Contents
+
+* [Usage](#usage)
+* [Redis Master](#redis-master)
+* [Redis Slave](#redis-slave)
+* [Redis Sentinel](#redis-sentinel)
+* [Test Redis master/slave replication](#test-redis-masterslave-replication)
+* [Benchmarks](#benchmarks)
+  * [Replicated Redis Master/Slave/Sentinel](#replicated-redis-masterslavesentinel)
+    * [1 Threads - Replicated Redis Master/Slave/Sentinel](#1-threads---replicated-redis-masterslavesentinel)
+    * [2 Threads - Replicated Redis Master/Slave/Sentinel](#2-threads---replicated-redis-masterslavesentinel)
+    * [3 Threads - Replicated Redis Master/Slave/Sentinel](#3-threads---replicated-redis-masterslavesentinel)
+  * [Non-Replication Standalone Redis](#non-replication-standalone-redis)
+    * [1 Threads - Non-Replication Standalone Redis](#1-threads---non-replication-standalone-redis)
+    * [2 Threads - Non-Replication Standalone Redis](#2-threads---non-replication-standalone-redis)
+    * [3 Threads - Non-Replication Standalone Redis](#3-threads---non-replication-standalone-redis)
+
+# Usage
+
 ```
 ./redis-ha.sh                
 
