@@ -42,6 +42,30 @@ keydb_install() {
   chown -R keydb:keydb /var/run/keydb /var/log/keydb /etc/keydb /var/lib/keydb
   chmod 755 /var/run/keydb
   echo "d      /var/run/keydb/         0755 keydb keydb" > /etc/tmpfiles.d/keydb.conf
+
+  # copy sentinel.conf template to /etc/keydb/sentinel.conf
+  \cp -af ./sentinel.conf $KEYDB_DIR
+
+  # Update log and pid file paths in custom config
+  sed -i "s|logfile \"\"|logfile /var/log/keydb/sentinel.log|" "${KEYDB_DIR}/sentinel.conf"
+  sed -i "s|pidfile /var/run/keydb-sentinel.pid|pidfile /var/run/keydb/keydb-sentinel.pid|" "${KEYDB_DIR}/sentinel.conf"
+  # Modify original or custom sentinel config file
+  sed -i "s/^sentinel monitor mymaster 127.0.0.1 6379 2/sentinel monitor mymaster 127.0.0.1 7379 2/" "${KEYDB_DIR}/sentinel.conf"
+  # sed -i "s/^# sentinel auth-pass <master-name> <password>/sentinel auth-pass mymaster $master_password/" "${KEYDB_DIR}/sentinel.conf"
+  # fix noexec /tmp
+  mkdir -p /home/keydbtmp
+  chown keydb:keydb /home/keydbtmp
+  chmod 1777 /home/keydbtmp
+  sed -i 's|dir /tmp|dir /home/keydbtmp|' "${KEYDB_DIR}/sentinel.conf"
+  # reduce failover time
+  sed -i 's|sentinel down-after-milliseconds mymaster 30000|sentinel down-after-milliseconds mymaster 5000|' "${KEYDB_DIR}/sentinel.conf"
+  sed -i 's|sentinel failover-timeout mymaster 180000|sentinel failover-timeout mymaster 60000|' "${KEYDB_DIR}/sentinel.conf"
+  # setup limit.conf
+  mkdir -p "/etc/systemd/system/keydb-sentinel.service.d"
+  if [ -f /etc/systemd/system/keydb-sentinel.service.d/limit.conf ]; then
+    \cp -af /etc/systemd/system/keydb-sentinel.service.d/limit.conf "/etc/systemd/system/keydb-sentinel.service.d/limit.conf"
+    sed -i "s|LimitNOFILE=.*|LimitNOFILE=524288|" "/etc/systemd/system/keydb-sentinel.service.d/limit.conf"
+  fi
   
   # adjust default keydb server to run on TCP port 7379 to not conflict
   # with redis default 6379 port and setup keydb.conf defaults
