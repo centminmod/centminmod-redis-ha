@@ -45,10 +45,11 @@ keydb_install() {
   # adjust default keydb server to run on TCP port 7379 to not conflict
   # with redis default 6379 port and setup keydb.conf defaults
   sed -i 's|^port 6379|port 7379|' ${KEYDB_DIR}/keydb.conf
+  sed -i 's|^tcp-backlog 511|tcp-backlog 65535|' ${KEYDB_DIR}/keydb.conf
   sed -i 's|dir ./|dir /var/lib/keydb|' ${KEYDB_DIR}/keydb.conf
   sed -i 's|^pidfile /var/run/keydb_6379.pid|pidfile /var/run/keydb/keydb_7379.pid|' ${KEYDB_DIR}/keydb.conf
   sed -i 's|^logfile ""|logfile /var/log/keydb/keydb.log|' ${KEYDB_DIR}/keydb.conf
-  cat ${KEYDB_DIR}/keydb.conf | egrep '^pid|^port|^log|^dir'
+  cat ${KEYDB_DIR}/keydb.conf | egrep '^pid|^port|^log|^dir|^tcp-backlog'
   
   # setup logrotate and systemd service files and dependencies
   \cp -af ./pkg/rpm/keydb_build/keydb_rpm/etc/logrotate.d/keydb /etc/logrotate.d/keydb
@@ -67,6 +68,8 @@ keydb_install() {
   mkdir -p /etc/systemd/system/keydb.service.d /etc/systemd/system/keydb-sentinel.service.d
   \cp -af ./pkg/rpm/keydb_build/keydb_rpm/etc/systemd/system/keydb.service.d/limit.conf /etc/systemd/system/keydb.service.d/limit.conf
   \cp -af ./pkg/rpm/keydb_build/keydb_rpm/etc/systemd/system/keydb-sentinel.service.d/limit.conf /etc/systemd/system/keydb-sentinel.service.d/limit.conf
+  sed -i 's|10240|65535|' /etc/systemd/system/keydb.service.d/limit.conf
+  sed -i 's|10240|65535|' /etc/systemd/system/keydb-sentinel.service.d/limit.conf
   
   # only enable keydb-server
   echo "systemctl daemon-reload"
@@ -80,6 +83,8 @@ keydb_install() {
 
   echo
   echo "keydb server installed"
+  echo
+  prlimit -p $(pidof keydb-server)
   echo
   keydb-server -v
   echo
