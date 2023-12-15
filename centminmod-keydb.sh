@@ -2,6 +2,10 @@
 # ==========================================================================
 # Centmin Mod EL8+ system keydb server install
 # ==========================================================================
+# for genkeydb function
+DEBUG_KEYDBGEN=n
+FORCE_DELETE='n'
+STARTPORT=7479
 
 # Function to get the lower value of TX and RX queues
 get_queue_count() {
@@ -221,11 +225,255 @@ keydb_upgrade() {
   fi
 }
 
+genkeydb() {
+  CLUSTER=$2
+  CLUSTER_CREATE=$3
+  STARTPORT=$4
+  # increment starts at 0
+  NUMBER=$(($1-1))
+  if [[ "$NUMBER" -eq '0' ]]; then
+    NUMBER=0
+  elif [[ "$NUMBER" -eq '1' ]]; then
+    NUMBER=1
+  fi
+  echo
+  echo "Creating keydb servers starting at TCP = $STARTPORT..."
+  for (( p=0; p <= $NUMBER; p++ ))
+    do
+      KEYDBPORT=$(($STARTPORT+$p))
+      echo "-------------------------------------------------------"
+      echo "creating keydb server: keydb${KEYDBPORT}.service [increment value: $p]"
+      echo "keydb TCP port: $KEYDBPORT"
+      if [[ "$DEBUG_KEYDBGEN" = [yY] ]]; then
+        if [ ! -f "/usr/lib/systemd/system/keydb${KEYDBPORT}.service" ]; then
+          echo "create systemd keydb${KEYDBPORT}.service"
+          echo "cp -a /usr/lib/systemd/system/keydb.service /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          echo "sed -i \"s|/etc/keydb/keydb.conf|/etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          echo "sed -i \"s|/var/run/keydb/keydb-server.pid|/var/run/keydb${KEYDBPORT}/keydb_${KEYDBPORT}.pid|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          echo "sed -i \"s|/var/lib/keydb|/var/lib/keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          echo "sed -i \"s|ReadWriteDirectories=-/etc/keydb|ReadWriteDirectories=-/etc/keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          echo "sed -i \"s|ReadWriteDirectories=-/var/run/keydb|ReadWriteDirectories=-/var/run/keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          echo "sed -i \"s|RuntimeDirectory=keydb|RuntimeDirectory=keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+        else
+          echo "/usr/lib/systemd/system/keydb${KEYDBPORT}.service already exists"
+        fi
+        if [ ! -f "/etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf" ]; then
+          echo "create /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf config file"
+          echo "mkdir -p /etc/keydb${KEYDBPORT}"
+          echo "chown -R keydb:keydb /etc/keydb${KEYDBPORT}"
+          echo "cp -a /etc/keydb/keydb.conf /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf"
+        else
+          echo "/etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf already exists"
+        fi
+        if [ -f /etc/systemd/system/keydb.service.d/limit.conf ]; then
+          echo "mkdir -p "/etc/systemd/system/keydb${KEYDBPORT}.service.d/""
+          echo "\cp -af /etc/systemd/system/keydb.service.d/limit.conf /etc/systemd/system/keydb${KEYDBPORT}.service.d/limit.conf"
+        fi
+        if [ ! -d "/var/lib/keydb${KEYDBPORT}" ]; then
+          echo "mkdir -p /var/lib/keydb${KEYDBPORT}"
+          echo "chown -R keydb:keydb /var/lib/keydb${KEYDBPORT}"
+        fi
+        echo "sed -i \"s|^port 7379|port ${KEYDBPORT}|\" /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf"
+        echo "sed -i \"s|dir /var/lib/keydb$|dir /var/lib/keydb${KEYDBPORT}|\" /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf"
+        echo "sed -i \"s|^pidfile /var/run/keydb/keydb_7379.pid|pidfile /var/run/keydb${KEYDBPORT}/keydb_${KEYDBPORT}.pid|\" /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf"
+        echo "sed -i \"s|^logfile /var/log/keydb/keydb.log|logfile /var/log/keydb/keydb${KEYDBPORT}.log|\" /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf"
+        echo "systemctl daemon-reload"
+        echo "systemctl start keydb${KEYDBPORT}"
+        echo "systemctl enable keydb${KEYDBPORT}"
+        echo
+        echo "KeyDB TCP $KEYDBPORT Info:"
+        echo
+        echo "service file: /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+        echo "service limit file: /etc/systemd/system/keydb${KEYDBPORT}.service.d/limit.conf"
+        echo "config directory: /etc/keydb${KEYDBPORT}"
+        echo "config file: /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf"
+        echo "data directory: /var/lib/keydb${KEYDBPORT}"
+        echo "pidfile: /var/run/keydb${KEYDBPORT}/keydb_${KEYDBPORT}.pid"
+        echo "log file: /var/log/keydb/keydb${KEYDBPORT}.log"
+        echo
+        if [[ "$UNIXSOCKET" = [Yy] ]]; then
+          echo "keydb-cli -s /var/run/keydb${KEYDBPORT}/keydb${KEYDBPORT}.sock INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
+        else
+          echo "keydb-cli -h 127.0.0.1 -p $KEYDBPORT INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
+        fi
+      else
+        if [ ! -f "/usr/lib/systemd/system/keydb${KEYDBPORT}.service" ]; then
+          echo "create systemd keydb${KEYDBPORT}.service"
+          echo "cp -a /usr/lib/systemd/system/keydb.service /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          cp -a /usr/lib/systemd/system/keydb.service /usr/lib/systemd/system/keydb${KEYDBPORT}.service
+          echo "sed -i \"s|/etc/keydb/keydb.conf|/etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          echo "sed -i \"s|/var/run/keydb/keydb-server.pid|/var/run/keydb${KEYDBPORT}/keydb_${KEYDBPORT}.pid|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          echo "sed -i \"s|/var/lib/keydb|/var/lib/keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          sed -i "s|/etc/keydb/keydb.conf|/etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf|" /usr/lib/systemd/system/keydb${KEYDBPORT}.service
+          sed -i "s|/var/run/keydb/keydb-server.pid|/var/run/keydb${KEYDBPORT}/keydb_${KEYDBPORT}.pid|" /usr/lib/systemd/system/keydb${KEYDBPORT}.service
+          sed -i "s|/var/lib/keydb|/var/lib/keydb${KEYDBPORT}|" /usr/lib/systemd/system/keydb${KEYDBPORT}.service
+          echo "sed -i \"s|ReadWriteDirectories=-/etc/keydb|ReadWriteDirectories=-/etc/keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          sed -i "s|ReadWriteDirectories=-/etc/keydb|ReadWriteDirectories=-/etc/keydb${KEYDBPORT}|" /usr/lib/systemd/system/keydb${KEYDBPORT}.service
+          echo "sed -i \"s|ReadWriteDirectories=-/var/run/keydb|ReadWriteDirectories=-/var/run/keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          sed -i "s|ReadWriteDirectories=-/var/run/keydb|ReadWriteDirectories=-/var/run/keydb${KEYDBPORT}|" /usr/lib/systemd/system/keydb${KEYDBPORT}.service
+          echo "sed -i \"s|RuntimeDirectory=keydb|RuntimeDirectory=keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          sed -i "s|RuntimeDirectory=keydb|RuntimeDirectory=keydb${KEYDBPORT}|" /usr/lib/systemd/system/keydb${KEYDBPORT}.service
+          # setup directories and permissions
+          mkdir -p /var/run/keydb${KEYDBPORT}
+          chown -R keydb:keydb /var/run/keydb${KEYDBPORT}
+          chmod 755 /var/run/keydb${KEYDBPORT}
+          echo "d      /var/run/keydb${KEYDBPORT}/         0755 keydb keydb" > /etc/tmpfiles.d/keydb${KEYDBPORT}.conf
+        else
+          echo "/usr/lib/systemd/system/keydb${KEYDBPORT}.service already exists"
+        fi
+        if [ ! -f "/etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf" ]; then
+          echo "create /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf config file"
+          echo "mkdir -p /etc/keydb${KEYDBPORT}"
+          echo "chown -R keydb:keydb /etc/keydb${KEYDBPORT}"
+          echo "cp -a /etc/keydb/keydb.conf /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf"
+          mkdir -p /etc/keydb${KEYDBPORT}
+          chown -R keydb:keydb /etc/keydb${KEYDBPORT}
+          cp -a /etc/keydb/keydb.conf /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf
+        else
+          echo "/etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf already exists"
+        fi
+        if [ -f /etc/systemd/system/keydb.service.d/limit.conf ]; then
+          echo "mkdir -p /etc/systemd/system/keydb${KEYDBPORT}.service.d/"
+          echo "\cp -af /etc/systemd/system/keydb.service.d/limit.conf /etc/systemd/system/keydb${KEYDBPORT}.service.d/limit.conf"
+          mkdir -p /etc/systemd/system/keydb${KEYDBPORT}.service.d/
+          \cp -af /etc/systemd/system/keydb.service.d/limit.conf /etc/systemd/system/keydb${KEYDBPORT}.service.d/limit.conf
+        fi
+        if [ ! -d "/var/lib/keydb${KEYDBPORT}" ]; then
+          echo "mkdir -p /var/lib/keydb${KEYDBPORT}"
+          mkdir -p "/var/lib/keydb${KEYDBPORT}"
+          echo "chown -R keydb:keydb /var/lib/keydb${KEYDBPORT}"
+          chown -R keydb:keydb /var/lib/keydb${KEYDBPORT}
+        fi
+        sed -i "s|^port 7379|port ${KEYDBPORT}|" /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf
+        sed -i "s|dir /var/lib/keydb$|dir /var/lib/keydb${KEYDBPORT}|" /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf
+        sed -i "s|^pidfile /var/run/keydb/keydb_7379.pid|pidfile /var/run/keydb${KEYDBPORT}/keydb_${KEYDBPORT}.pid|" /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf
+        sed -i "s|^logfile /var/log/keydb/keydb.log|logfile /var/log/keydb/keydb${KEYDBPORT}.log|" /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf
+        echo "systemctl daemon-reload"
+        systemctl daemon-reload
+        echo "systemctl start keydb${KEYDBPORT}"
+        systemctl start keydb${KEYDBPORT}
+        echo "systemctl enable keydb${KEYDBPORT}"
+        systemctl enable keydb${KEYDBPORT}
+        echo
+        echo "KeyDB TCP $KEYDBPORT Info:"
+        echo "service file: /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+        echo "service limit file: /etc/systemd/system/keydb${KEYDBPORT}.service.d/limit.conf"
+        echo "config directory: /etc/keydb${KEYDBPORT}"
+        echo "config file: /etc/keydb${KEYDBPORT}/keydb${KEYDBPORT}.conf"
+        echo "data directory: /var/lib/keydb${KEYDBPORT}"
+        echo "pidfile: /var/run/keydb${KEYDBPORT}/keydb_${KEYDBPORT}.pid"
+        echo "log file: /var/log/keydb/keydb${KEYDBPORT}.log"
+        echo
+        if [[ "$UNIXSOCKET" = [Yy] ]]; then
+          echo "keydb-cli -s /var/run/keydb${KEYDBPORT}/keydb${KEYDBPORT}.sock INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
+          keydb-cli -s /var/run/keydb${KEYDBPORT}/keydb${KEYDBPORT}.sock INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
+        else
+          echo "keydb-cli -h 127.0.0.1 -p $KEYDBPORT INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'"
+          keydb-cli -h 127.0.0.1 -p $KEYDBPORT INFO SERVER | egrep 'redis_version|redis_mode|process_id|tcp_port|uptime|executable|config_file'
+        fi
+      fi
+  done
+}
+
+genkeydb_del() {
+  # increment starts at 0
+  NUMBER=$(($1-1))
+  NUMBER_SENTINELS=2
+  if [[ "$NUMBER" -eq '0' ]]; then
+    NUMBER=0
+  elif [[ "$NUMBER" -eq '1' ]]; then
+    NUMBER=1
+  fi
+  echo
+  for (( p=0; p <= $NUMBER; p++ ))
+    do
+      KEYDBPORT=$(($STARTPORT+$p))
+    if [[ "$FORCE_DELETE" = [Yy] || -f "/usr/lib/systemd/system/keydb${KEYDBPORT}.service" ]]; then
+      echo "-------------------------------------------------------"
+      echo "Deleting /usr/lib/systemd/system/keydb${KEYDBPORT}.service ..."
+      if [[ "$DEBUG_KEYDBGEN" = [yY] ]]; then
+        echo "systemctl stop keydb${KEYDBPORT}.service"
+        echo "systemctl disable keydb${KEYDBPORT}.service"
+        echo "rm -rf /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+      else
+        systemctl stop keydb${KEYDBPORT}.service
+        systemctl disable keydb${KEYDBPORT}.service
+        rm -rf "/usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+      fi
+    fi
+    if [[ "$FORCE_DELETE" = [Yy] || -d "/etc/systemd/system/keydb${KEYDBPORT}.service.d" ]]; then
+      echo "-------------------------------------------------------"
+      echo "Deleting /etc/systemd/system/keydb${KEYDBPORT}.service.d ..."
+      if [[ "$DEBUG_KEYDBGEN" = [yY] ]]; then
+        echo "rm -rf /etc/systemd/system/keydb${KEYDBPORT}.service.d"
+      else
+        rm -rf "/etc/systemd/system/keydb${KEYDBPORT}.service.d"
+      fi
+    fi
+    if [[ "$FORCE_DELETE" = [Yy] || -d "/etc/keydb${KEYDBPORT}" ]]; then
+      echo "-------------------------------------------------------"
+      echo "Deleting /etc/keydb${KEYDBPORT} ..."
+      if [[ "$DEBUG_KEYDBGEN" = [yY] ]]; then
+        echo "rm -rf /etc/keydb${KEYDBPORT}"
+      else
+        rm -rf "/etc/keydb${KEYDBPORT}"
+      fi
+    fi
+    if [[ "$FORCE_DELETE" = [Yy] || -d "/var/lib/keydb${KEYDBPORT}" ]]; then
+      echo "-------------------------------------------------------"
+      echo "Deleting /var/lib/keydb${KEYDBPORT} ..."
+      if [[ "$DEBUG_KEYDBGEN" = [yY] ]]; then
+        echo "rm -rf /var/lib/keydb${KEYDBPORT}"
+      else
+        rm -rf "/var/lib/keydb${KEYDBPORT}"
+      fi
+    fi
+    if [[ "$FORCE_DELETE" = [Yy] || -f "/var/run/keydb/keydb_${KEYDBPORT}.pid" ]]; then
+      echo "-------------------------------------------------------"
+      echo "Deleting /var/run/keydb/keydb_${KEYDBPORT}.pid ..."
+      if [[ "$DEBUG_KEYDBGEN" = [yY] ]]; then
+        echo "rm -rf /var/run/keydb/keydb_${KEYDBPORT}.pid"
+      else
+        rm -rf "/var/run/keydb/keydb_${KEYDBPORT}.pid"
+      fi
+    fi
+    if [[ "$FORCE_DELETE" = [Yy] || -f "/var/log/keydb/keydb${KEYDBPORT}.log" ]]; then
+      echo "-------------------------------------------------------"
+      echo "Deleting /var/log/keydb/keydb${KEYDBPORT}.log ..."
+      if [[ "$DEBUG_KEYDBGEN" = [yY] ]]; then
+        echo "rm -rf /var/log/keydb/keydb${KEYDBPORT}.log"
+      else
+        rm -rf "/var/log/keydb/keydb${KEYDBPORT}.log"
+      fi
+    fi
+    if [[ "$FORCE_DELETE" = [Yy] || -f "/etc/tmpfiles.d/keydb${KEYDBPORT}.conf" ]]; then
+      echo "-------------------------------------------------------"
+      echo "Deleting /etc/tmpfiles.d/keydb${KEYDBPORT}.conf ..."
+      if [[ "$DEBUG_KEYDBGEN" = [yY] ]]; then
+        echo "rm -rf /etc/tmpfiles.d/keydb${KEYDBPORT}.conf"
+      else
+        rm -rf "/etc/tmpfiles.d/keydb${KEYDBPORT}.conf"
+      fi
+    fi
+  done
+  echo "Deletion completed"
+  exit
+}
+
 help() {
   echo
   echo "Usage:"
   echo
-  echo "$0 {install|upgrade}"
+  echo "* multi X - no. of standalone redis instances to create"
+# echo "* multi-cache X - no. of standalone redis instances + disable ondisk persistence"
+  echo "* delete X - no. of redis instances to delete"
+  echo "* delete X 7479 - no. of redis instances to delete + custom start port 7479"
+  echo
+  echo "$0 install"
+  echo "$0 upgrade"
+  echo "$0 multi X"
+  # echo "$0 multi-cache X"
+  echo "$0 delete X"
 }
 
 case "$1" in
@@ -234,6 +482,30 @@ case "$1" in
     ;;
   upgrade )
     keydb_upgrade
+    ;;
+  multi )
+    NUM=$2
+    CUSTOM_STARTPORT=$3
+    if [[ ! -z "$CUSTOM_STARTPORT" ]]; then
+      CHECK_PORT=$(netstat -nt | grep -q $CUSTOM_STARTPORT; echo $?)
+      if [[ "$CHECK_PORT" -ne '0' ]]; then
+        STARTPORT=$CUSTOM_STARTPORT
+      else
+        echo
+        echo "Error: TCP port $CUSTOM_STARTPORT in use, try another port"
+        echo
+        exit
+      fi
+    fi
+    genkeydb $NUM na na $STARTPORT
+    ;;
+  delete )
+    NUM=$2
+    CUSTOM_STARTPORT=$3
+    if [[ ! -z "$CUSTOM_STARTPORT" ]]; then
+      STARTPORT=$CUSTOM_STARTPORT
+    fi
+    genkeydb_del $NUM na na $STARTPORT
     ;;
   * )
     help
