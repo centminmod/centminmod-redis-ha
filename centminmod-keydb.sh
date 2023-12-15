@@ -71,7 +71,8 @@ keydb_install() {
   mkdir -p /var/run/keydb /var/log/keydb /var/lib/keydb
   chown -R keydb:keydb /var/run/keydb /var/log/keydb /etc/keydb /var/lib/keydb
   chmod 755 /var/run/keydb
-  echo "d      /var/run/keydb/         0755 keydb keydb" > /etc/tmpfiles.d/keydb.conf
+  echo "d      /var/run/keydb/         0755 keydb keydb -" > /etc/tmpfiles.d/keydb.conf
+  systemd-tmpfiles --create /etc/tmpfiles.d/keydb.conf
 
   # copy sentinel.conf template to /etc/keydb/sentinel.conf
   \cp -af ./sentinel.conf $KEYDB_DIR
@@ -320,7 +321,9 @@ genkeydb() {
           mkdir -p /var/run/keydb${KEYDBPORT}
           chown -R keydb:keydb /var/run/keydb${KEYDBPORT}
           chmod 755 /var/run/keydb${KEYDBPORT}
-          echo "d      /var/run/keydb${KEYDBPORT}/         0755 keydb keydb" > /etc/tmpfiles.d/keydb${KEYDBPORT}.conf
+          echo "d      /var/run/keydb${KEYDBPORT}/         0755 keydb keydb -" > /etc/tmpfiles.d/keydb${KEYDBPORT}.conf
+          echo "systemd-tmpfiles --create /etc/tmpfiles.d/keydb${KEYDBPORT}.conf"
+          systemd-tmpfiles --create /etc/tmpfiles.d/keydb${KEYDBPORT}.conf
         else
           echo "/usr/lib/systemd/system/keydb${KEYDBPORT}.service already exists"
         fi
