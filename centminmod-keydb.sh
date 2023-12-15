@@ -90,16 +90,18 @@ keydb_install() {
   mkdir -p "/etc/systemd/system/keydb-sentinel.service.d"
   if [ -f /etc/systemd/system/keydb-sentinel.service.d/limit.conf ]; then
     \cp -af /etc/systemd/system/keydb-sentinel.service.d/limit.conf "/etc/systemd/system/keydb-sentinel.service.d/limit.conf"
-    sed -i "s|LimitNOFILE=.*|LimitNOFILE=524288|" "/etc/systemd/system/keydb-sentinel.service.d/limit.conf"
+    sed -i "s|LimitNOFILE=.*|LimitNOFILE=5242880|" "/etc/systemd/system/keydb-sentinel.service.d/limit.conf"
   fi
   
   # adjust default keydb server to run on TCP port 7379 to not conflict
   # with redis default 6379 port and setup keydb.conf defaults
   sed -i 's|^port 6379|port 7379|' ${KEYDB_DIR}/keydb.conf
-  sed -i 's|^tcp-backlog 511|tcp-backlog 65535|' ${KEYDB_DIR}/keydb.conf
+  sed -i 's|^tcp-backlog 511|tcp-backlog 524288|' ${KEYDB_DIR}/keydb.conf
   sed -i 's|dir ./|dir /var/lib/keydb|' ${KEYDB_DIR}/keydb.conf
   sed -i 's|^pidfile /var/run/keydb_6379.pid|pidfile /var/run/keydb/keydb_7379.pid|' ${KEYDB_DIR}/keydb.conf
   sed -i 's|^logfile ""|logfile /var/log/keydb/keydb.log|' ${KEYDB_DIR}/keydb.conf
+  sed -i 's|^# min-clients-per-thread 50|min-clients-per-thread 50|' ${KEYDB_DIR}/keydb.conf
+  sed -i 's|^min-clients-per-thread .*|min-clients-per-thread 40|' ${KEYDB_DIR}/keydb.conf
   if [ "$(nproc)" -ge '4' ]; then
     sed -i 's|^# server-thread-affinity|server-thread-affinity|' ${KEYDB_DIR}/keydb.conf
   fi
@@ -107,7 +109,7 @@ keydb_install() {
     # set to lower of NIC TX or RX queue sizes
     sed -i "s|^server-threads .*|server-threads $queue_count|" ${KEYDB_DIR}/keydb.conf
   fi
-  cat ${KEYDB_DIR}/keydb.conf | egrep '^pid|^port|^log|^dir|^tcp-backlog|^server-threads|server-thread|replica-ignore-maxmemory'
+  cat ${KEYDB_DIR}/keydb.conf | egrep '^pid|^port|^log|^dir|^tcp-backlog|^server-threads|server-thread|replica-ignore-maxmemory|min-clients'
   
   # setup logrotate and systemd service files and dependencies
   \cp -af ./pkg/rpm/keydb_build/keydb_rpm/etc/logrotate.d/keydb /etc/logrotate.d/keydb
@@ -126,8 +128,8 @@ keydb_install() {
   mkdir -p /etc/systemd/system/keydb.service.d /etc/systemd/system/keydb-sentinel.service.d
   \cp -af ./pkg/rpm/keydb_build/keydb_rpm/etc/systemd/system/keydb.service.d/limit.conf /etc/systemd/system/keydb.service.d/limit.conf
   \cp -af ./pkg/rpm/keydb_build/keydb_rpm/etc/systemd/system/keydb-sentinel.service.d/limit.conf /etc/systemd/system/keydb-sentinel.service.d/limit.conf
-  sed -i 's|10240|65535|' /etc/systemd/system/keydb.service.d/limit.conf
-  sed -i 's|10240|65535|' /etc/systemd/system/keydb-sentinel.service.d/limit.conf
+  sed -i 's|10240|5242880|' /etc/systemd/system/keydb.service.d/limit.conf
+  sed -i 's|10240|5242880|' /etc/systemd/system/keydb-sentinel.service.d/limit.conf
   
   # only enable keydb-server
   echo "systemctl daemon-reload"
