@@ -150,6 +150,77 @@ keydb_install() {
   echo
 }
 
+version_to_int() {
+    local ver="$1"
+    IFS='.' read -r -a ver_parts <<< "$ver"
+    printf -v ver_num "%03d%03d%03d" "${ver_parts[0]}" "${ver_parts[1]}" "${ver_parts[2]}"
+    echo $ver_num
+}
+
+keydb_upgrade() {
+  if [[ -f /opt/rh/gcc-toolset-11/root/usr/bin/gcc && -f /opt/rh/gcc-toolset-11/root/usr/bin/g++ ]]; then
+    source /opt/rh/gcc-toolset-11/enable
+  elif [[ -f /opt/rh/gcc-toolset-10/root/usr/bin/gcc && -f /opt/rh/gcc-toolset-10/root/usr/bin/g++ ]]; then
+    source /opt/rh/gcc-toolset-10/enable
+  fi
+
+  # install KeyDB via source compile to allow KeyDB to run
+  # beside existing Redis YUM packages
+  mkdir -p /svr-setup
+  cd /svr-setup
+  rm -rf KeyDB
+  git clone https://github.com/Snapchat/KeyDB
+  cd KeyDB
+  git fetch --all
+  latest_branch=$(git branch -r | grep 'RELEASE_' | sort -r | head -n 1 | awk '{print $NF}' | sed 's/origin\///')
+
+  # Get the currently installed KeyDB version
+  current_version=$(keydb-server -v | awk '{print $3}' | cut -d'=' -f2)
+  
+  # Assuming latest_branch contains the latest version branch name like "RELEASE_6_3_4"
+  # Extract the version number from the latest_branch variable
+  latest_version=$(echo $latest_branch | tr '_' '.' | cut -d'.' -f2-)
+  
+  # Convert versions to integers
+  current_version_int=$(version_to_int $current_version)
+  latest_version_int=$(version_to_int $latest_version)
+  
+  # Compare the versions
+  if [ "$current_version_int" -lt "$latest_version_int" ]; then
+      echo "KeyDB update available: current version $current_version, latest version $latest_version."
+      echo
+      git checkout "$latest_branch"
+      git pull
+      make distclean
+      time make -j$(nproc) BUILD_TLS=yes USE_SYSTEMD=yes MALLOC=jemalloc
+      #time make test
+      time make install
+      \cp -af ./src/keydb-diagnostic-tool /usr/local/bin/keydb-diagnostic-tool
+      
+      cat ${KEYDB_DIR}/keydb.conf | egrep '   ^pid|^port|^log|^dir|^tcp-backlog|^server-threads|server-thread|replica-ignore-maxmemory|min-clients'
+    
+      # only enable keydb-server
+      echo "systemctl daemon-reload"
+      systemctl daemon-reload
+      echo "systemctl enable keydb"
+      systemctl enable keydb
+      echo "systemctl start keydb"
+      systemctl start keydb
+      echo "systemctl status keydb --no-pager -l"
+      systemctl status keydb --no-pager -l
+    
+      echo
+      echo "keydb server upgraded"
+      echo
+      prlimit -p $(pidof keydb-server)
+      echo
+      keydb-server -v
+      echo
+  else
+      echo "KeyDB is up-to-date (version $current_version)."
+  fi
+}
+
 help() {
   echo
   echo "Usage:"
