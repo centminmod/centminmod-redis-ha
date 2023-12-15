@@ -3,7 +3,33 @@
 # Centmin Mod EL8+ system keydb server install
 # ==========================================================================
 
+# Function to get the lower value of TX and RX queues
+get_queue_count() {
+    local interface=$1
+    local tx_count=$(ls -d /sys/class/net/"$interface"/queues/tx-* | wc -l)
+    local rx_count=$(ls -d /sys/class/net/"$interface"/queues/rx-* | wc -l)
+    if [ $tx_count -lt $rx_count ]; then
+        echo $tx_count
+    else
+        echo $rx_count
+    fi
+}
+
 keydb_install() {
+  # Choose the primary network interface
+  primary_interface=$(ip route | grep default | awk '{print $5}' | head -n 1)
+
+  # Get queue count
+  queue_count=$(get_queue_count "$primary_interface")
+  queue_count=${queue_count:-2}
+  if [ "$queue_count" -eq '1' ]; then
+    # optimal value
+    queue_count=2
+  elif [ "$queue_count" -ge '4' ]; then
+    # max keydb recommended value for server-threads
+    queue_count=4
+  fi
+
   yum install -y libuuid-devel which libatomic tcltls libzstd rpm-build
   
   if [[ -f /opt/rh/gcc-toolset-11/root/usr/bin/gcc && -f /opt/rh/gcc-toolset-11/root/usr/bin/g++ ]]; then
@@ -74,9 +100,13 @@ keydb_install() {
   sed -i 's|dir ./|dir /var/lib/keydb|' ${KEYDB_DIR}/keydb.conf
   sed -i 's|^pidfile /var/run/keydb_6379.pid|pidfile /var/run/keydb/keydb_7379.pid|' ${KEYDB_DIR}/keydb.conf
   sed -i 's|^logfile ""|logfile /var/log/keydb/keydb.log|' ${KEYDB_DIR}/keydb.conf
-  # if [ "$(nproc)" -ge '4' ]; then
-  #   sed -i 's|^# server-thread-affinity|server-thread-affinity|' ${KEYDB_DIR}/keydb.conf
-  # fi
+  if [ "$(nproc)" -ge '4' ]; then
+    sed -i 's|^# server-thread-affinity|server-thread-affinity|' ${KEYDB_DIR}/keydb.conf
+  fi
+  if [ "$queue_count" -ge '1' ]; then
+    # set to lower of NIC TX or RX queue sizes
+    sed -i "s|^server-threads .*|server-threads $queue_count|" ${KEYDB_DIR}/keydb.conf
+  fi
   cat ${KEYDB_DIR}/keydb.conf | egrep '^pid|^port|^log|^dir|^tcp-backlog|^server-threads|server-thread|replica-ignore-maxmemory'
   
   # setup logrotate and systemd service files and dependencies
