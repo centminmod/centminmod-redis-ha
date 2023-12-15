@@ -254,6 +254,7 @@ genkeydb() {
           echo "sed -i \"s|ReadWriteDirectories=-/etc/keydb|ReadWriteDirectories=-/etc/keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
           echo "sed -i \"s|ReadWriteDirectories=-/var/run/keydb|ReadWriteDirectories=-/var/run/keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
           echo "sed -i \"s|RuntimeDirectory=keydb|RuntimeDirectory=keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          echo "sed -i \"s|Alias=keydb.service$|Alias=keydb${KEYDBPORT}.service|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
         else
           echo "/usr/lib/systemd/system/keydb${KEYDBPORT}.service already exists"
         fi
@@ -313,6 +314,8 @@ genkeydb() {
           sed -i "s|ReadWriteDirectories=-/var/run/keydb|ReadWriteDirectories=-/var/run/keydb${KEYDBPORT}|" /usr/lib/systemd/system/keydb${KEYDBPORT}.service
           echo "sed -i \"s|RuntimeDirectory=keydb|RuntimeDirectory=keydb${KEYDBPORT}|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
           sed -i "s|RuntimeDirectory=keydb|RuntimeDirectory=keydb${KEYDBPORT}|" /usr/lib/systemd/system/keydb${KEYDBPORT}.service
+          echo "sed -i \"s|Alias=keydb.service$|Alias=keydb${KEYDBPORT}.service|\" /usr/lib/systemd/system/keydb${KEYDBPORT}.service"
+          sed -i "s|Alias=keydb.service$|Alias=keydb${KEYDBPORT}.service|" /usr/lib/systemd/system/keydb${KEYDBPORT}.service
           # setup directories and permissions
           mkdir -p /var/run/keydb${KEYDBPORT}
           chown -R keydb:keydb /var/run/keydb${KEYDBPORT}
