@@ -53,10 +53,23 @@ keydb_install() {
   git checkout RELEASE_6_3_4
   git pull
   make distclean
+  export KEYDB_CFLAGS="-fPIC -O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2"
+  export KEYDB_LDFLAGS="-Wl,-z,relro,-z,now -pie"
+  export CFLAGS="-fPIC -O2 -fstack-protector-strong -D_FORTIFY_SOURCE=2"
+  export LDFLAGS="-Wl,-z,relro,-z,now -pie"
+  export CPPFLAGS="-D_FORTIFY_SOURCE=2"
+  export CXXFLAGS="-fPIC -O2"
   time make -j$(nproc) BUILD_TLS=yes USE_SYSTEMD=yes MALLOC=jemalloc
   #time make test
   time make install
   \cp -af ./src/keydb-diagnostic-tool /usr/local/bin/keydb-diagnostic-tool
+
+  if [ -f /usr/local/bin/checksec ]; then
+    echo
+    echo "checksec --file=$(which keydb-server) --format=json | jq -r"
+    checksec --file=$(which keydb-server) --format=json | jq -r
+    echo
+  fi
  
   # add keydb linux user
   getent group keydb &> /dev/null || groupadd -r keydb &> /dev/null

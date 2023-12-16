@@ -61,7 +61,23 @@ Examples:
 Sentinel mode:
        ./keydb-server /etc/sentinel.conf --sentinel
 ```
-
+```
+checksec --file=$(which keydb-server) --format=json | jq -r
+{
+  "/usr/local/bin/keydb-server": {
+    "relro": "full",
+    "canary": "yes",
+    "nx": "no",
+    "pie": "yes",
+    "rpath": "no",
+    "runpath": "no",
+    "symbols": "yes",
+    "fortify_source": "yes",
+    "fortified": "11",
+    "fortify-able": "26"
+  }
+}
+```
 ```
 keydb-cli -p 7379 info
 # Server
