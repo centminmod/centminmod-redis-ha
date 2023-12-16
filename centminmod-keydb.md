@@ -981,7 +981,7 @@ Done.
 `memtier_benchmark` comparing Redis 7.2.3 vs KeyDB 6.3.4 for 1, 2, 3 threads on 4 CPU core KVM VPS running AlmaLinux 8 with Centmin Mod 130.00beta01 LEMP stack. Added KeyDB server config raising `server-threads` from `2` to `4`.
 
 | Database | Threads | Sets (ops/sec) | Gets (ops/sec) | Totals (ops/sec) | vs Redis 2 threads Sets | vs Redis 2 threads Gets |
-|-|-|-|-|-|
+|-|-|-|-|-|-|-|
 | KeyDB 6.3.4 server-threads=4 | 1 | 9818.99 | 147284.89 | 157103.88 | 0.95x | 0.95x |
 | KeyDB 6.3.4 server-threads=4 | 2 | 21434.70 | 321520.53 | 342955.23 | 2.07x | 2.07x |
 | KeyDB 6.3.4 server-threads=4 | 3 | 29326.45 | 439896.80 | 469223.26 | 2.84x | 2.84x |
