@@ -978,13 +978,16 @@ Done.
 
 # Benchmarks
 
-`memtier_benchmark` comparing Redis 7.2.3 vs KeyDB 6.3.4 for 1, 2, 3 threads on 4 CPU core KVM VPS running AlmaLinux 8 with Centmin Mod 130.00beta01 LEMP stack.
+`memtier_benchmark` comparing Redis 7.2.3 vs KeyDB 6.3.4 for 1, 2, 3 threads on 4 CPU core KVM VPS running AlmaLinux 8 with Centmin Mod 130.00beta01 LEMP stack. Added KeyDB server config raising `server-threads` from `2` to `4`.
 
 | Database | Threads | Sets (ops/sec) | Gets (ops/sec) | Totals (ops/sec) | 
 |-|-|-|-|-|
-| KeyDB 6.3.4 | 1 | 7770.48 | 116557.14 | 124327.62 |
-| KeyDB 6.3.4 | 2 | 14650.89 | 219763.35 | 234414.24 |  
-| KeyDB 6.3.4 | 3 | 16959.49 | 254392.40 | 271351.89 |
+| KeyDB 6.3.4 server-threads=4 | 1 | 9818.99 | 147284.89 | 157103.88 |
+| KeyDB 6.3.4 server-threads=4 | 2 | 21434.70 | 321520.53 | 342955.23 |  
+| KeyDB 6.3.4 server-threads=4 | 3 | 29326.45 | 439896.80 | 469223.26 |
+| KeyDB 6.3.4 server-threads=2 | 1 | 7770.48 | 116557.14 | 124327.62 |
+| KeyDB 6.3.4 server-threads=2 | 2 | 14650.89 | 219763.35 | 234414.24 |  
+| KeyDB 6.3.4 server-threads=2 | 3 | 16959.49 | 254392.40 | 271351.89 |
 | Redis 7.2.3 | 1 | 7404.66 | 111069.97 | 118474.64 |
 | Redis 7.2.3 | 2 | 10338.26 | 155073.83 | 165412.08 |
 | Redis 7.2.3 | 3 | 6660.16 | 99902.42 | 106562.59 |
@@ -1050,7 +1053,79 @@ REDHAT_SUPPORT_PRODUCT="AlmaLinux"
 REDHAT_SUPPORT_PRODUCT_VERSION="8.9"
 ```
 
-## KeyDB benchmark - 1 thread
+## KeyDB benchmark - 1 thread with `server-threads = 4`
+
+```
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 64%,   0 secs]  1 threads:      128573 ops,  128641 (avg:  128641) ops[RUN #1 100%,   1 secs]  0 threads:      200000 ops,  128641 (avg:  157106) ops/sec, 7.97MB/sec (avg: 9.72MB/sec),  0.78 (avg:  0.64) msec latency
+
+1         Threads
+100       Connections per thread
+2000      Requests per client
+
+
+ALL STATS
+============================================================================================================================
+Type         Ops/sec     Hits/sec   Misses/sec    Avg. Latency     p50 Latency     p99 Latency   p99.9 Latency       KB/sec 
+----------------------------------------------------------------------------------------------------------------------------
+Sets         9818.99          ---          ---         0.64477         0.53500        10.23900        11.19900      4141.33 
+Gets       147284.89       187.74    147097.15         0.63606         0.52700        10.87900        11.19900      5808.31 
+Waits           0.00          ---          ---             ---             ---             ---             ---          --- 
+Totals     157103.88       187.74    147097.15         0.63660         0.52700        10.87900        11.19900      9949.63
+```
+
+## KeyDB benchmark - 2 threads with `server-threads = 4`
+
+```
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 45%,   0 secs]  2 threads:      181451 ops,  184198 (avg:  184198) ops[RUN #1 78%,   1 secs]  2 threads:      313023 ops,  182823 (avg:  183618) ops[RUN #1 99%,   2 secs]  1 threads:      397001 ops,  182823 (avg:  192182) ops[RUN #1 100%,   2 secs]  0 threads:      400000 ops,  182823 (avg:  193350) ops/sec, 11.35MB/sec (avg: 12.01MB/sec),  1.09 (avg:  1.03) msec latency
+
+2         Threads
+100       Connections per thread
+2000      Requests per client
+
+
+ALL STATS
+============================================================================================================================
+Type         Ops/sec     Hits/sec   Misses/sec    Avg. Latency     p50 Latency     p99 Latency   p99.9 Latency       KB/sec 
+----------------------------------------------------------------------------------------------------------------------------
+Sets        21434.70          ---          ---         1.04704         0.55100        11.58300        21.37500      9040.48 
+Gets       321520.53       637.04    320883.49         1.03336         0.53500        11.39100        22.14300     12765.32 
+Waits           0.00          ---          ---             ---             ---             ---             ---          --- 
+Totals     342955.23       637.04    320883.49         1.03422         0.53500        11.39100        22.14300     21805.80 
+```
+
+## KeyDB benchmark - 3 threads with `server-threads = 4`
+
+```
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 3 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 41%,   0 secs]  3 threads:      247753 ops,  248006 (avg:  248006) ops[RUN #1 83%,   1 secs]  3 threads:      497103 ops,  283776 (avg:  264745) ops[RUN #1 100%,   2 secs]  0 threads:      600000 ops,  283776 (avg:  285430) ops/sec, 17.77MB/sec (avg: 17.89MB/sec),  1.06 (avg:  1.05) msec latency
+
+3         Threads
+100       Connections per thread
+2000      Requests per client
+
+
+ALL STATS
+============================================================================================================================
+Type         Ops/sec     Hits/sec   Misses/sec    Avg. Latency     p50 Latency     p99 Latency   p99.9 Latency       KB/sec 
+----------------------------------------------------------------------------------------------------------------------------
+Sets        29326.45          ---          ---         1.06113         0.84700         5.47100        10.68700     12368.99 
+Gets       439896.80      1602.40    438294.40         1.05028         0.83100         5.66300        11.32700     17741.35 
+Waits           0.00          ---          ---             ---             ---             ---             ---          --- 
+Totals     469223.26      1602.40    438294.40         1.05096         0.83100         5.66300        11.26300     30110.35 
+```
+
+## KeyDB benchmark - 1 thread with `server-threads = 2`
 
 ```
 memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
@@ -1075,7 +1150,7 @@ Waits           0.00          ---          ---             ---             ---  
 Totals     124327.62       148.57    116408.57         0.80434         0.73500         1.51100         3.26300      7873.86
 ```
 
-## KeyDB benchmark - 2 threads
+## KeyDB benchmark - 2 threads with `server-threads = 2`
 
 ```
 memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
@@ -1100,7 +1175,7 @@ Waits           0.00          ---          ---             ---             ---  
 Totals     234414.24       550.29    219213.06         0.85226         0.79900         1.73500         4.31900     14947.95
 ```
 
-## KeyDB benchmark - 3 threads
+## KeyDB benchmark - 3 threads with `server-threads = 2`
 
 ```
 memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 7379 --protocol=redis -t 3 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
