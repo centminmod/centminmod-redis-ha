@@ -978,9 +978,9 @@ Done.
 
 # Benchmarks
 
-`memtier_benchmark` comparing Redis 7.2.3 vs KeyDB 6.3.4 for 1, 2, 3 and 8 threads on 4 CPU core KVM VPS running AlmaLinux 8 with Centmin Mod 130.00beta01 LEMP stack. Added KeyDB server config raising `server-threads` from `2` to `4`.
+`memtier_benchmark` comparing Redis 7.2.3 with default `io-threads` 1 and 2 vs KeyDB 6.3.4 for 1, 2, 3 and 8 threads on 4 CPU core KVM VPS running AlmaLinux 8 with Centmin Mod 130.00beta01 LEMP stack. Added KeyDB server config raising `server-threads` from `2` to `4`.
 
-| Database | Threads | Sets (ops/sec) | Gets (ops/sec) | Totals (ops/sec) | vs Redis 2 threads Sets | vs Redis 2 threads Gets |
+| KV Databases | Threads | Sets (ops/sec) | Gets (ops/sec) | Totals (ops/sec) | vs Redis 2 threads Sets | vs Redis 2 threads Gets |
 |-|-|-|-|-|-|-|
 | KeyDB 6.3.4 server-threads=4 | 1 | 9818.99 | 147284.89 | 157103.88 | 0.95x | 0.95x |
 | KeyDB 6.3.4 server-threads=4 | 2 | 21434.70 | 321520.53 | 342955.23 | 2.07x | 2.07x |
@@ -990,10 +990,14 @@ Done.
 | KeyDB 6.3.4 server-threads=2 | 2 | 14650.89 | 219763.35 | 234414.24 | 1.42x | 1.42x |
 | KeyDB 6.3.4 server-threads=2 | 3 | 16959.49 | 254392.40 | 271351.89 | 1.64x | 1.64x |
 | KeyDB 6.3.4 server-threads=2 | 8 | 22175.40 | 332631.04 | 354806.44 | 2.14x | 2.14x |
-| Redis 7.2.3 | 1 | 7404.66 | 111069.97 | 118474.64 | - | - |
-| Redis 7.2.3 | 2 | 10338.26 | 155073.83 | 165412.08 | - | - |
-| Redis 7.2.3 | 3 | 6660.16 | 99902.42 | 106562.59 | - | - |
-| Redis 7.2.3 | 8 | 10177.75 | 152666.27 | 162844.02 | - | - |
+| Redis 7.2.3 io-threads 1 | 1 | 7404.66 | 111069.97 | 118474.64 | - | - |
+| Redis 7.2.3 io-threads 1 | 2 | 10338.26 | 155073.83 | 165412.08 | - | - |
+| Redis 7.2.3 io-threads 1 | 3 | 6660.16 | 99902.42 | 106562.59 | - | - |
+| Redis 7.2.3 io-threads 1 | 8 | 10177.75 | 152666.27 | 162844.02 | - | - |
+| Redis 7.2.3 io-threads 2 | 1 | 7886.29 | 118294.40 | 126180.69 | - | - |
+| Redis 7.2.3 io-threads 2 | 2 | 14104.89 | 211573.37 | 225678.26 | - | - |
+| Redis 7.2.3 io-threads 2 | 3 | 13244.12 | 198661.73 | 211905.85 | - | - |
+| Redis 7.2.3 io-threads 2 | 8 | 12750.31 | 191254.59 | 204004.90 | - | - |
 
 ```
 lscpu
@@ -1256,7 +1260,7 @@ Waits           0.00          ---          ---             ---             ---  
 Totals     354806.44      3288.83    329342.20         2.61558         1.67100        12.15900        20.99100     23553.28 
 ```
 
-## Redis benchmark - 1 thread
+## Redis io-threads 1 benchmark - 1 thread
 
 ```
 memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
@@ -1281,7 +1285,7 @@ Waits           0.00          ---          ---             ---             ---  
 Totals     118474.64       395.11    110674.86         0.84406         0.75100         1.53500         3.82300      7599.00
 ```
 
-## Redis benchmark - 2 threads
+## Redis io-threads 1 benchmark - 2 threads
 
 ```
 memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
@@ -1306,7 +1310,7 @@ Waits           0.00          ---          ---             ---             ---  
 Totals     165412.08       562.40    154511.43         1.21265         1.14300         2.11100         4.92700     10613.67 
 ````
 
-## Redis benchmark - 3 threads
+## Redis io-threads 1 benchmark - 3 threads
 
 ```
 memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 3 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
@@ -1331,7 +1335,7 @@ Waits           0.00          ---          ---             ---             ---  
 Totals     106562.59       363.91     99538.51         2.44675         2.44700         4.47900        10.43100      6838.19 
 ```
 
-## Redis benchmark - 8 threads
+## Redis io-threads 1 benchmark - 8 threads
 
 ```
 memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 8 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
@@ -1354,6 +1358,106 @@ Sets        10177.75          ---          ---         4.98303         4.57500  
 Gets       152666.27      1509.46    151156.81         4.92684         4.51100         8.63900        24.70300      6517.49 
 Waits           0.00          ---          ---             ---             ---             ---             ---          --- 
 Totals     162844.02      1509.46    151156.81         4.93035         4.51100         8.57500        24.57500     10810.15 
+```
+
+## Redis io-threads 2 benchmark - 1 threads
+
+```
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 1 --distinct-client-seed --hide-histogram --requests=10000 --clients=100 --pipeline=1 --data-size=384
+
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 12%,   0 secs]  1 threads:      124029 ops,  124103 (avg:  124103)[RUN #1 25%,   2 secs]  1 threads:      247139 ops,  123033 (avg:  123568)[RUN #1 36%,   3 secs]  1 threads:      364454 ops,  117302 (avg:  121479)[RUN #1 49%,   4 secs]  1 threads:      492808 ops,  128341 (avg:  123195)[RUN #1 61%,   5 secs]  1 threads:      614439 ops,  121618 (avg:  122879)[RUN #1 74%,   6 secs]  1 threads:      740707 ops,  126235 (avg:  123439)[RUN #1 87%,   7 secs]  1 threads:      867670 ops,  126948 (avg:  123940)[RUN #1 100%,   7 secs]  0 threads:     1000000 ops,  126948 (avg:  126180) ops/sec, 8.08MB/sec (avg: 8.02MB/sec),  0.79 (avg:  0.79) msec latency
+
+1         Threads
+100       Connections per thread
+10000     Requests per client
+
+
+ALL STATS
+============================================================================================================================
+Type         Ops/sec     Hits/sec   Misses/sec    Avg. Latency     p50 Latency     p99 Latency   p99.9 Latency       KB/sec 
+----------------------------------------------------------------------------------------------------------------------------
+Sets         7886.29          ---          ---         0.79585         0.75100         1.28700         3.48700      3326.18 
+Gets       118294.40       744.59    117549.80         0.79237         0.75100         1.27900         3.51900      4889.45 
+Waits           0.00          ---          ---             ---             ---             ---             ---          --- 
+Totals     126180.69       744.59    117549.80         0.79258         0.75100         1.27900         3.50300      8215.63 
+```
+
+## Redis io-threads 2 benchmark - 2 threads
+
+```
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 2 --distinct-client-seed --hide-histogram --requests=10000 --clients=100 --pipeline=1 --data-size=384
+
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 11%,   1 secs]  2 threads:      228085 ops,  227056 (avg:  227056)[RUN #1 24%,   2 secs]  2 threads:      475034 ops,  246862 (avg:  236938)[RUN #1 35%,   3 secs]  2 threads:      703744 ops,  226385 (avg:  233402)[RUN #1 46%,   4 secs]  2 threads:      928753 ops,  224801 (avg:  231259)[RUN #1 56%,   5 secs]  2 threads:     1114366 ops,  184434 (avg:  221876)[RUN #1 67%,   6 secs]  2 threads:     1332922 ops,  218403 (avg:  221299)[RUN #1 78%,   7 secs]  2 threads:     1552007 ops,  218868 (avg:  220953)[RUN #1 89%,   8 secs]  2 threads:     1789472 ops,  237227 (avg:  222983)[RUN #1 100%,   8 secs]  0 threads:     2000000 ops,  237227 (avg:  223898) ops/sec, 15.60MB/sec (avg: 14.71MB/sec),  0.84 (avg:  0.89) msec latency
+
+2         Threads
+100       Connections per thread
+10000     Requests per client
+
+
+ALL STATS
+============================================================================================================================
+Type         Ops/sec     Hits/sec   Misses/sec    Avg. Latency     p50 Latency     p99 Latency   p99.9 Latency       KB/sec 
+----------------------------------------------------------------------------------------------------------------------------
+Sets        14104.89          ---          ---         0.89858         0.83100         1.71900        11.51900      5948.98 
+Gets       211573.37      2621.48    208951.89         0.89287         0.83100         1.68700        11.26300      9232.37 
+Waits           0.00          ---          ---             ---             ---             ---             ---          --- 
+Totals     225678.26      2621.48    208951.89         0.89322         0.83100         1.68700        11.26300     15181.35 
+```
+
+## Redis io-threads 2 benchmark - 3 threads
+
+```
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 3 --distinct-client-seed --hide-histogram --requests=10000 --clients=100 --pipeline=1 --data-size=384
+
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 7%,   1 secs]  3 threads:      202942 ops,  202912 (avg:  202912) [RUN #1 15%,   2 secs]  3 threads:      443631 ops,  240663 (avg:  221787)[RUN #1 22%,   3 secs]  3 threads:      664901 ops,  219459 (avg:  221007)[RUN #1 31%,   4 secs]  3 threads:      916792 ops,  250997 (avg:  228508)[RUN #1 38%,   5 secs]  3 threads:     1134556 ops,  216802 (avg:  226164)[RUN #1 45%,   6 secs]  3 threads:     1355264 ops,  220486 (avg:  225220)[RUN #1 52%,   7 secs]  3 threads:     1569024 ops,  212061 (avg:  223332)[RUN #1 58%,   8 secs]  3 threads:     1754232 ops,  183739 (avg:  218364)[RUN #1 65%,   9 secs]  3 threads:     1945297 ops,  191010 (avg:  215335)[RUN #1 72%,  10 secs]  3 threads:     2168521 ops,  223201 (avg:  216119)[RUN #1 80%,  11 secs]  3 threads:     2402698 ops,  234083 (avg:  217748)[RUN #1 87%,  12 secs]  3 threads:     2621809 ops,  218925 (avg:  217846)[RUN #1 95%,  12 secs]  1 threads:     2846717 ops,  218925 (avg:  220574)[RUN #1 99%,  13 secs]  1 threads:     2981558 ops,  218925 (avg:  225204)[RUN #1 100%,  13 secs]  0 threads:     3000000 ops,  218925 (avg:  225905) ops/sec, 14.86MB/sec (avg: 15.32MB/sec),  1.37 (avg:  1.33) msec latency
+
+3         Threads
+100       Connections per thread
+10000     Requests per client
+
+
+ALL STATS
+============================================================================================================================
+Type         Ops/sec     Hits/sec   Misses/sec    Avg. Latency     p50 Latency     p99 Latency   p99.9 Latency       KB/sec 
+----------------------------------------------------------------------------------------------------------------------------
+Sets        13244.12          ---          ---         1.33552         1.00700        11.13500        19.58300      5585.92 
+Gets       198661.73      3684.20    194977.53         1.32733         1.00700        11.13500        19.45500      9131.06 
+Waits           0.00          ---          ---             ---             ---             ---             ---          --- 
+Totals     211905.85      3684.20    194977.53         1.32784         1.00700        11.13500        19.45500     14716.98 
+```
+
+## Redis io-threads 2 benchmark - 8 threads
+
+```
+memtier_benchmark -s 127.0.0.1 --ratio=1:15 -p 6379 --protocol=redis -t 8 --distinct-client-seed --hide-histogram --requests=2000 --clients=100 --pipeline=1 --data-size=384
+
+Writing results to stdout
+[RUN #1] Preparing benchmark client...
+[RUN #1] Launching threads now...
+[RUN #1 11%,   1 secs]  8 threads:      175164 ops,  174766 (avg:  174766)[RUN #1 23%,   2 secs]  8 threads:      363174 ops,  187963 (avg:  181358)[RUN #1 35%,   3 secs]  8 threads:      557557 ops,  194346 (avg:  185684)[RUN #1 48%,   4 secs]  8 threads:      760091 ops,  202507 (avg:  189887)[RUN #1 60%,   5 secs]  8 threads:      962612 ops,  201756 (avg:  192267)[RUN #1 74%,   6 secs]  8 threads:     1178316 ops,  215665 (avg:  196163)[RUN #1 88%,   7 secs]  8 threads:     1402592 ops,  222233 (avg:  199913)[RUN #1 100%,   7 secs]  0 threads:     1600000 ops,  222233 (avg:  207038) ops/sec, 15.50MB/sec (avg: 14.48MB/sec),  3.58 (avg:  3.86) msec latency
+
+8         Threads
+100       Connections per thread
+2000      Requests per client
+
+
+ALL STATS
+============================================================================================================================
+Type         Ops/sec     Hits/sec   Misses/sec    Avg. Latency     p50 Latency     p99 Latency   p99.9 Latency       KB/sec 
+----------------------------------------------------------------------------------------------------------------------------
+Sets        12750.31          ---          ---         4.04270         3.31100        23.42300        43.77500      5377.68 
+Gets       191254.59      4721.95    186532.64         3.85142         3.27900        15.23100        44.54300      9234.77 
+Waits           0.00          ---          ---             ---             ---             ---             ---          --- 
+Totals     204004.90      4721.95    186532.64         3.86338         3.27900        15.99900        44.54300     14612.45 
 ```
 
 # KeyDB Cluster Setup
