@@ -7,6 +7,11 @@ DEBUG_KEYDBGEN=n
 FORCE_DELETE='n'
 STARTPORT=7479
 
+# clang version
+CLANG='n'
+CLANG_BIN='/usr/bin/clang'
+CLANG_DETECT_VER=$(clang --version | head -n1 | awk '{print $3}' | cut -d . -f1)
+
 # Function to get the lower value of TX and RX queues
 get_queue_count() {
     local interface=$1
@@ -36,10 +41,21 @@ keydb_install() {
 
   yum install -y libuuid-devel which libatomic tcltls libzstd rpm-build
   
-  if [[ -f /opt/rh/gcc-toolset-11/root/usr/bin/gcc && -f /opt/rh/gcc-toolset-11/root/usr/bin/g++ ]]; then
+  if [[ "$CLANG" = [yY] && "$CLANG_DETECT_VER" -ge '15' ]]; then
+    # LLVMLTO_OPT=' -flto'
+    # CCTOOLSET=' --gcc-toolchain=/opt/rh/gcc-toolset-11/root/usr'
+    CLANG_CCOPT=' -Wno-sign-compare -Wno-string-plus-int -Wno-deprecated-declarations -Wno-unused-parameter -Wno-unused-const-variable -Wno-conditional-uninitialized -Wno-mismatched-tags -Wno-sometimes-uninitialized -Wno-parentheses-equality -Wno-tautological-compare -Wno-self-assign -Wno-deprecated-register -Wno-deprecated -Wno-invalid-source-encoding -Wno-pointer-sign -Wno-parentheses -Wno-enum-conversion -Wno-c++11-compat-deprecated-writable-strings -Wno-write-strings -Wno-unused-command-line-argument -Wno-strict-prototypes'
+    export CC="ccache ${CLANG_BIN}${LLVMLTO_OPT} -ferror-limit=0${CCTOOLSET}${CLANG_CCOPT}"
+    export CXX="ccache ${CLANG_BIN}++${LLVMLTO_OPT} -ferror-limit=0${CLANG_CCOPT}"
+    export CCACHE_CPP2=yes
+  elif [[ -f /opt/rh/gcc-toolset-11/root/usr/bin/gcc && -f /opt/rh/gcc-toolset-11/root/usr/bin/g++ ]]; then
     source /opt/rh/gcc-toolset-11/enable
+    export CC="ccache gcc"
+    export CXX="ccache g++"
   elif [[ -f /opt/rh/gcc-toolset-10/root/usr/bin/gcc && -f /opt/rh/gcc-toolset-10/root/usr/bin/g++ ]]; then
     source /opt/rh/gcc-toolset-10/enable
+    export CC="ccache gcc"
+    export CXX="ccache g++"
   fi
   
   # install KeyDB via source compile to allow KeyDB to run
